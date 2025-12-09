@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Upload opgaver.xlsx til Render</h2>
+    <input type="file" id="fileInput" />
+    <button onclick="upload()">Upload</button>
+
+    <script>
+        async function upload() {
+            const file = document.getElementById("fileInput").files[0];
+            if (!file) return alert("Vælg en fil!");
+
+            const base64 = await file.arrayBuffer().then(b => btoa(
+                new Uint8Array(b).reduce((s, byte) => s + String.fromCharCode(byte), "")
+            ));
+
+            const res = await fetch("https://gruppe2projekt.onrender.com/api/upload-initial-excel", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ file: base64 })
+            });
+
+            const data = await res.json();
+            alert(JSON.stringify(data));
+        }
+    </script>
+</body>
+</html>
