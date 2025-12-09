@@ -76,6 +76,12 @@ async function startEdit(id) {
     document.getElementById("radius").value = task.Radius;
     document.getElementById("latitude").value = task.Latitude;
     document.getElementById("longitude").value = task.Longitude;
+    document.getElementById("options").value = task.Options.join(";");
+    document.getElementById("activationCondition").value = task.ActivationCondition;
+    document.getElementById("activated").value = task.Activated ? "true" : "false";
+    document.getElementById("completed").value = task.Completed ? "true" : "false";
+    document.getElementById("difficulty").value = task.Difficulty;
+
 
     // Skift UI til rediger-tilstand
     editMode = true;
@@ -113,9 +119,16 @@ function getFormData() {
         Location: document.getElementById("location").value,
         Radius: Number(document.getElementById("radius").value),
         Latitude: Number(document.getElementById("latitude").value),
-        Longitude: Number(document.getElementById("longitude").value)
+        Longitude: Number(document.getElementById("longitude").value),
+
+        Options: document.getElementById("options").value,
+        ActivationCondition: document.getElementById("activationCondition").value,
+        Activated: document.getElementById("activated").value === "true",
+        Completed: document.getElementById("completed").value === "true",
+        Difficulty: document.getElementById("difficulty").value
     };
 }
+
 
 // Ryd formular
 function clearForm() {
@@ -126,6 +139,12 @@ function clearForm() {
     document.getElementById("radius").value = "";
     document.getElementById("latitude").value = "";
     document.getElementById("longitude").value = "";
+    document.getElementById("options").value = "";
+    document.getElementById("activationCondition").value = "";
+    document.getElementById("activated").value = "false";
+    document.getElementById("completed").value = "false";
+    document.getElementById("difficulty").value = "";
+
 }
 
 window.onload = loadTasks;

@@ -32,6 +32,27 @@
 
         <label>Longitude:</label>
         <input id="longitude" type="number" step="any">
+        
+        <label>Handlinger (adskilt af ;)</label>
+        <input id="options" placeholder="Start;Stop;Læs videre">
+
+        <label>Activation Condition</label>
+        <input id="activationCondition" placeholder="Lokalitet">
+
+        <label>Activated</label>
+        <select id="activated">
+            <option value="false">False</option>
+            <option value="true">True</option>
+        </select>
+
+        <label>Completed</label>
+        <select id="completed">
+            <option value="false">False</option>
+            <option value="true">True</option>
+        </select>
+
+        <label>Difficulty</label>
+        <input id="difficulty" placeholder="Let / Mellem / Svær">
 
         <button onclick="createTask()">Opret opgave</button>
         <button id="updateBtn" onclick="updateTask()" style="display:none;">Gem ændringer</button>
