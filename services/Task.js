@@ -40,7 +40,7 @@ class Task {
             type: this.Type,
             location: this.Location,
             radius: this.Radius,
-            options: this.Options,
+            options: [...this.Options],
             activationCondition: this.ActivationCondition,
             activated: this.Activated,
             completed: this.Completed,
