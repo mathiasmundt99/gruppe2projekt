@@ -1,6 +1,8 @@
 // Importerer nødvendige moduler
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 
 // Importerer taskService som indeholder forretningslogik
 const taskService = require("./services/taskService");
@@ -11,7 +13,7 @@ const app = express();
 app.use(cors());
 
 // Gør det muligt at modtage JSON-data fra frontend
-app.use(express.json());
+app.use(express.json({ limit: "10mb" })); // vigtig for filupload
 
 
 // ----------------------------------------------------
@@ -19,8 +21,8 @@ app.use(express.json());
 // ----------------------------------------------------
 app.get("/api/tasks", async (req, res) => {
     try {
-        const tasks = await taskService.getTasks(); // Henter alle opgaver fra Excel
-        res.json(tasks); // Sender dem som JSON tilbage til frontend
+        const tasks = await taskService.getTasks();
+        res.json(tasks);
     } catch (err) {
         console.error("Fejl ved hentning af opgaver:", err);
         res.status(500).json({ error: "Kunne ikke hente opgaver" });
@@ -33,7 +35,7 @@ app.get("/api/tasks", async (req, res) => {
 // ----------------------------------------------------
 app.post("/api/tasks", async (req, res) => {
     try {
-        const newTask = await taskService.createTask(req.body); // Opretter ny opgave
+        const newTask = await taskService.createTask(req.body);
         res.json(newTask);
     } catch (err) {
         console.error("Fejl ved oprettelse:", err);
@@ -48,7 +50,7 @@ app.post("/api/tasks", async (req, res) => {
 app.put("/api/tasks/:id", async (req, res) => {
     try {
         const id = Number(req.params.id);
-        const updated = await taskService.updateTask(id, req.body); // Opdaterer opgave
+        const updated = await taskService.updateTask(id, req.body);
         res.json(updated);
     } catch (err) {
         console.error("Fejl ved opdatering:", err);
@@ -62,7 +64,7 @@ app.put("/api/tasks/:id", async (req, res) => {
 // ----------------------------------------------------
 app.delete("/api/tasks/:id", async (req, res) => {
     try {
-        await taskService.deleteTask(Number(req.params.id)); // Sletter opgave
+        await taskService.deleteTask(Number(req.params.id));
         res.json({ success: true });
     } catch (err) {
         console.error("Fejl ved sletning:", err);
@@ -76,11 +78,33 @@ app.delete("/api/tasks/:id", async (req, res) => {
 // ----------------------------------------------------
 app.post("/api/export", async (req, res) => {
     try {
-        const exportPath = await taskService.exportJSON(); // Laver en JSON-fil
+        const exportPath = await taskService.exportJSON();
         res.json({ file: exportPath });
     } catch (err) {
         console.error("Fejl ved eksport:", err);
         res.status(500).json({ error: "Kunne ikke eksportere JSON" });
+    }
+});
+
+
+// ----------------------------------------------------
+// *** MIDDLERTIDIG ROUTE TIL AT UPLOADE EXCEL TIL DISK ***
+// ----------------------------------------------------
+app.post("/api/upload-initial-excel", async (req, res) => {
+    try {
+        const filePath = path.join("/data", "opgaver.xlsx");
+        const fileBuffer = req.body.file;
+
+        if (!fileBuffer) {
+            return res.status(400).json({ error: "No file provided" });
+        }
+
+        fs.writeFileSync(filePath, Buffer.from(fileBuffer, "base64"));
+
+        res.json({ message: "Excel uploaded successfully to /data/opgaver.xlsx" });
+    } catch (error) {
+        console.error("Fejl i upload:", error);
+        res.status(500).json({ error: "Failed to upload initial Excel" });
     }
 });
 
