@@ -42,7 +42,7 @@ function updateTask(id, updates) {
     const updated = new Task({
         ...tasks[index],
         ...updates,
-        ID: tasks[index].ID // ID må ikke ændres
+        ID: tasks[index].ID
     });
 
     tasks[index] = updated;
@@ -55,7 +55,7 @@ function deleteTask(id) {
     const tasks = readExcel();
     const filtered = tasks.filter(t => t.ID !== Number(id));
 
-    if (filtered.length === tasks.length) return false; // fandtes ikke
+    if (filtered.length === tasks.length) return false;
 
     writeExcel(filtered);
     return true;

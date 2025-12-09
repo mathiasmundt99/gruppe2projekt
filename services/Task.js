@@ -50,11 +50,6 @@ class Task {
         };
     }
 
-
-    // Eks. fremtidige metoder:
-    isActive() {
-        return this.Activated === true && this.Completed === false;
-    }
 }
 
 module.exports = Task;
