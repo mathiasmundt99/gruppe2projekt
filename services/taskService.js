@@ -3,20 +3,20 @@ const { readExcel, writeExcel } = require("./excelService");
 
 function getTasks() {
     const rows = readExcel();
-    return rows.map(r => new Task(r));
+    return rows.map(row => new Task(row));
 }
 
 function createTask(data) {
     const tasks = getTasks();
-    const task = new Task(data);
-    tasks.push(task);
+    const newTask = new Task(data);
+    tasks.push(newTask);
     writeExcel(tasks);
-    return task;
+    return newTask;
 }
 
 function updateTask(id, updates) {
     const tasks = getTasks();
-    const index = tasks.findIndex(t => t.id == id);
+    const index = tasks.findIndex(t => String(t.id) === String(id));
     if (index === -1) throw new Error("Task not found");
 
     Object.assign(tasks[index], updates);
@@ -28,14 +28,13 @@ function updateTask(id, updates) {
 
 function deleteTask(id) {
     const tasks = getTasks();
-    const filtered = tasks.filter(t => t.id != id);
+    const filtered = tasks.filter(t => String(t.id) !== String(id));
     writeExcel(filtered);
     return true;
 }
 
 function exportJSON() {
-    const tasks = getTasks();
-    return tasks; // Frontend henter JSON direkte
+    return getTasks();
 }
 
 module.exports = {

@@ -1,28 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <title>Opgave Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
 <body>
-    <h2>Upload opgaver.xlsx til Render</h2>
-    <input type="file" id="fileInput" />
-    <button onclick="upload()">Upload</button>
 
-    <script>
-        async function upload() {
-            const file = document.getElementById("fileInput").files[0];
-            if (!file) return alert("Vælg en fil!");
+    <div class="container">
+        <h1>Opgave Manager</h1>
 
-            const base64 = await file.arrayBuffer().then(b => btoa(
-                new Uint8Array(b).reduce((s, byte) => s + String.fromCharCode(byte), "")
-            ));
+        <section class="form-section">
+            <h2>Opret ny opgave</h2>
 
-            const res = await fetch("https://gruppe2projekt.onrender.com/api/upload-initial-excel", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ file: base64 })
-            });
+            <form id="taskForm">
+                <input type="text" id="title" placeholder="Titel" required>
+                <input type="text" id="description" placeholder="Beskrivelse">
+                <input type="text" id="type" placeholder="Type">
+                <input type="text" id="zone" placeholder="Zone">
+                <input type="number" id="radius" placeholder="Radius (meter)">
+                <input type="number" id="latitude" placeholder="Latitude">
+                <input type="number" id="longitude" placeholder="Longitude">
+                <input type="text" id="options" placeholder="Options (komma-separeret)">
 
-            const data = await res.json();
-            alert(JSON.stringify(data));
-        }
-    </script>
+                <button type="submit">➕ Tilføj opgave</button>
+            </form>
+        </section>
+
+        <section class="task-list">
+            <h2>Alle opgaver</h2>
+            <table id="taskTable">
+                <thead>
+                    <tr>
+                        <th>Titel</th>
+                        <th>Type</th>
+                        <th>Zone</th>
+                        <th>Handlinger</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rækker indsættes her -->
+                </tbody>
+            </table>
+        </section>
+
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
