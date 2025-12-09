@@ -33,17 +33,21 @@ class Task {
     toSharedJSON() {
         return {
             id: this.ID,
-            titel: this.Title,
-            beskrivelse: this.Description,
+            title: this.Title,
+            description: this.Description,
             type: this.Type,
-            lokation: {
-                tekst: this.Location,
-                latitude: this.Latitude,
-                longitude: this.Longitude,
-                radius: this.Radius
-            }
+            location: this.Location,
+            radius: this.Radius,
+            options: this.Options,
+            activationCondition: this.ActivationCondition,
+            activated: this.Activated,
+            completed: this.Completed,
+            difficulty: this.Difficulty,
+            latitude: this.Latitude,
+            longitude: this.Longitude
         };
     }
+
 
     // Eks. fremtidige metoder:
     isActive() {
