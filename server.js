@@ -92,26 +92,19 @@ app.get("/api/export", (req, res) => {
 const PORT = process.env.PORT || 3000;
 const fs = require("fs");
 
-app.post("/api/upload-excel", (req, res) => {
+// ⚠️ RYD HELE /data MAPPE – MIDLERIDTIGT ⚠️
+app.delete("/api/debug/clear-data", (req, res) => {
     try {
-        if (!req.body.file) {
-            return res.status(400).json({ error: "No file data received" });
+        const filePath = path.join("/data", "opgaver.xlsx");
+
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath); // SLETTER FILEN
         }
 
-        // Hvor Excel-filen skal ligge
-        const excelPath = process.env.EXCEL_PATH || "/data/opgaver.xlsx";
-
-        // Konverter base64 → buffer
-        const fileBuffer = Buffer.from(req.body.file, "base64");
-
-        // Skriv fil
-        fs.writeFileSync(excelPath, fileBuffer);
-
-        return res.json({ message: "Excel uploaded successfully!" });
-
+        return res.json({ message: "DATA-DISK RYDET. Excel er slettet." });
     } catch (err) {
-        console.error("Upload error:", err);
-        res.status(500).json({ error: "Excel upload failed" });
+        console.error(err);
+        res.status(500).json({ error: "Kunne ikke rydde data-disk." });
     }
 });
 app.listen(PORT, () => {
