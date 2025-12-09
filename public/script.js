@@ -14,14 +14,30 @@ async function loadTasks() {
     tasks.forEach(task => {
         const div = document.createElement("div");
         div.className = "task";
-        div.innerHTML = `
-            <strong>${task.Title}</strong><br>
-            ${task.Description}<br>
-            <small>Type: ${task.Type} | ID: ${task.ID}</small><br><br>
 
+        let html = `
+            <h3>${task.Title}</h3>
+            <p>${task.Description}</p>
+            <ul>
+        `;
+
+        for (const key in task) {
+            let value = task[key];
+
+            if (Array.isArray(value)) {
+                value = value.join(", ");
+            }
+
+            html += `<li><strong>${key}:</strong> ${value}</li>`;
+        }
+
+        html += `
+            </ul>
             <button onclick="startEdit(${task.ID})">Rediger</button>
             <button onclick="deleteTask(${task.ID})" style="margin-left:10px;">Slet</button>
         `;
+
+        div.innerHTML = html;
         list.appendChild(div);
     });
 }
