@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";  // Skiftes til Render-URL senere
+const API_URL = "https://gruppe2-opgaver.onrender.com";  // Skiftes til Render-URL senere
 
 // Hent alle opgaver
 async function loadTasks() {
