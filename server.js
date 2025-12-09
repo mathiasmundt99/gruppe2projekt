@@ -2,16 +2,28 @@
 
 const http = require("http");
 const url = require("url");
+
 const {
     getAllTasks,
     getTask,
     createTask,
     updateTask,
     deleteTask,
-    exportTask
+    exportTask,
+    exportAllTasks
 } = require("./opgaveService");
 
-// CORS headers (gør det muligt for frontend + Team 2/3 at hente data)
+// Helper functions
+function sendJSON(res, data) {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(data));
+}
+
+function notFound(res) {
+    res.writeHead(404);
+    res.end("Not Found");
+}
+
 function setHeaders(res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
@@ -25,7 +37,7 @@ const server = http.createServer((req, res) => {
     const path = parsedUrl.pathname;
     const method = req.method;
 
-    // Preflight (til POST/PUT)
+    // Handle OPTIONS
     if (method === "OPTIONS") {
         res.writeHead(204);
         return res.end();
@@ -35,9 +47,7 @@ const server = http.createServer((req, res) => {
     // GET /opgaver
     // -------------------------
     if (method === "GET" && path === "/opgaver") {
-        const data = getAllTasks();
-        res.writeHead(200, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify(data));
+        return sendJSON(res, getAllTasks());
     }
 
     // -------------------------
@@ -45,33 +55,28 @@ const server = http.createServer((req, res) => {
     // -------------------------
     const taskMatch = path.match(/^\/opgaver\/(\d+)$/);
     if (method === "GET" && taskMatch) {
-        const id = taskMatch[1];
+        const id = Number(taskMatch[1]);
         const task = getTask(id);
 
-        if (!task) {
-            res.writeHead(404);
-            return res.end("Not Found");
-        }
-
-        res.writeHead(200, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify(task));
+        return task ? sendJSON(res, task) : notFound(res);
     }
 
     // -------------------------
-    // GET /opgaver/:id/export
+    // GET /export
     // -------------------------
-    const exportMatch = path.match(/^\/opgaver\/(\d+)\/export$/);
+    if (method === "GET" && path === "/export") {
+        return sendJSON(res, exportAllTasks());
+    }
+
+    // -------------------------
+    // GET /export/:id
+    // -------------------------
+    const exportMatch = path.match(/^\/export\/(\d+)$/);
     if (method === "GET" && exportMatch) {
-        const id = exportMatch[1];
+        const id = Number(exportMatch[1]);
         const data = exportTask(id);
 
-        if (!data) {
-            res.writeHead(404);
-            return res.end("Not Found");
-        }
-
-        res.writeHead(200, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify(data));
+        return data ? sendJSON(res, data) : notFound(res);
     }
 
     // -------------------------
@@ -79,14 +84,11 @@ const server = http.createServer((req, res) => {
     // -------------------------
     if (method === "POST" && path === "/opgaver") {
         let body = "";
-
         req.on("data", chunk => (body += chunk));
         req.on("end", () => {
             const newTask = createTask(JSON.parse(body));
-            res.writeHead(201, { "Content-Type": "application/json" });
-            res.end(JSON.stringify(newTask));
+            sendJSON(res, newTask);
         });
-
         return;
     }
 
@@ -94,23 +96,12 @@ const server = http.createServer((req, res) => {
     // PUT /opgaver/:id
     // -------------------------
     if (method === "PUT" && taskMatch) {
-        const id = taskMatch[1];
         let body = "";
-
         req.on("data", chunk => (body += chunk));
         req.on("end", () => {
-            const updates = JSON.parse(body);
-            const updatedTask = updateTask(id, updates);
-
-            if (!updatedTask) {
-                res.writeHead(404);
-                return res.end("Not Found");
-            }
-
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify(updatedTask));
+            const updated = updateTask(Number(taskMatch[1]), JSON.parse(body));
+            return updated ? sendJSON(res, updated) : notFound(res);
         });
-
         return;
     }
 
@@ -118,28 +109,16 @@ const server = http.createServer((req, res) => {
     // DELETE /opgaver/:id
     // -------------------------
     if (method === "DELETE" && taskMatch) {
-        const id = taskMatch[1];
-        const ok = deleteTask(id);
-
-        if (!ok) {
-            res.writeHead(404);
-            return res.end("Not Found");
-        }
+        const ok = deleteTask(Number(taskMatch[1]));
+        if (!ok) return notFound(res);
 
         res.writeHead(204);
         return res.end();
     }
 
-    // -------------------------
     // Fallback
-    // -------------------------
-    res.writeHead(404);
-    res.end("Not Found");
+    notFound(res);
 });
 
-// Render bruger process.env.PORT
 const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, () => {
-    console.log("Server running on port " + PORT);
-});
+server.listen(PORT, () => console.log("Server running on port " + PORT));

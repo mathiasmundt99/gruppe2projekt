@@ -68,11 +68,18 @@ function exportTask(id) {
     return exportToSharedJSON(task);
 }
 
+// EXPORT alle opgaver i shared JSON format
+function exportAllTasks() {
+    const tasks = readExcel();
+    return tasks.map(task => task.toSharedJSON());
+}
+
 module.exports = {
     getAllTasks,
     getTask,
     createTask,
     updateTask,
     deleteTask,
-    exportTask
+    exportTask,
+    exportAllTasks
 };
