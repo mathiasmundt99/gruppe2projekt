@@ -20,17 +20,9 @@ class Task {
         this.Type = Type;
         this.Location = Location;
         this.Radius = Radius !== "" ? Number(Radius) : null;
-        // Options skal altid være et array
-        if (typeof Options === "string") {
-            this.Options = Options
-                .split(";")
-                .map(o => o.trim())
-                .filter(o => o.length > 0);
-        } else if (Array.isArray(Options)) {
-            this.Options = Options;
-        } else {
-            this.Options = [];
-        }
+        this.Options = typeof Options === "string"
+            ? Options.split(";").map(o => o.trim()).filter(o => o.length > 0)
+            : [];
         this.ActivationCondition = ActivationCondition;
         this.Activated = Activated === true || Activated === "true";
         this.Completed = Completed === true || Completed === "true";
