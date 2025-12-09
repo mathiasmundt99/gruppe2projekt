@@ -90,6 +90,30 @@ app.get("/api/export", (req, res) => {
 
 // Start serveren
 const PORT = process.env.PORT || 3000;
+const fs = require("fs");
+
+app.post("/api/upload-excel", (req, res) => {
+    try {
+        if (!req.body.file) {
+            return res.status(400).json({ error: "No file data received" });
+        }
+
+        // Hvor Excel-filen skal ligge
+        const excelPath = process.env.EXCEL_PATH || "/data/opgaver.xlsx";
+
+        // Konverter base64 → buffer
+        const fileBuffer = Buffer.from(req.body.file, "base64");
+
+        // Skriv fil
+        fs.writeFileSync(excelPath, fileBuffer);
+
+        return res.json({ message: "Excel uploaded successfully!" });
+
+    } catch (err) {
+        console.error("Upload error:", err);
+        res.status(500).json({ error: "Excel upload failed" });
+    }
+});
 app.listen(PORT, () => {
     console.log("Server kører på port", PORT);
 });
