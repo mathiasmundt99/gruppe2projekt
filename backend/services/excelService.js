@@ -1,83 +1,55 @@
-// Dette modul håndterer alt arbejde med Excel-filen:
-// - hente Excel via HTTP
-// - skrive Excel via FTP til One.com
-// - konvertere data mellem Excel og JS
-
-const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
 const XLSX = require("xlsx");
-const ftp = require("basic-ftp");
+const Task = require("../models/task");
 
-// Læses fra Render Environment Variables
-const EXCEL_URL = process.env.EXCEL_URL;       // offentlig URL til filen
-const FTP_HOST = process.env.FTP_HOST;
-const FTP_USER = process.env.FTP_USER;
-const FTP_PASS = process.env.FTP_PASS;
-const FTP_FILE_PATH = process.env.EXCEL_PATH; // /www/data/opgaver.xlsx
+// Sti til Excel-filen på Render disk
+const EXCEL_PATH = path.join("/data", "opgaver.xlsx");
 
-
-// ----------------------------------------------------
-// Henter Excel-filen fra dit domæne
-// ----------------------------------------------------
-async function readRawRows() {
-    const response = await axios.get(EXCEL_URL, {
-        responseType: "arraybuffer"
-    });
-
-    const workbook = XLSX.read(response.data, { type: "buffer" });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    // Konverterer Excel sheet → JSON rækker
-    return XLSX.utils.sheet_to_json(sheet);
+// Hvis filen ikke findes, opret en tom Excel
+function ensureExcelExists() {
+    if (!fs.existsSync(EXCEL_PATH)) {
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet([]);
+        XLSX.utils.book_append_sheet(wb, ws, "Opgaver");
+        XLSX.writeFile(wb, EXCEL_PATH);
+    }
 }
 
-
-// ----------------------------------------------------
-// Skriver Excel-filen opdateret tilbage til One.com via FTP
-// ----------------------------------------------------
-async function writeRawRows(rows) {
-    // Konverter JSON → Excel sheet
-    const worksheet = XLSX.utils.json_to_sheet(rows);
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Opgaver");
-
-    // Konverter workbook til buffer (binary .xlsx)
-    const excelBuffer = XLSX.write(workbook, {
-        type: "buffer",
-        bookType: "xlsx"
-    });
-
-    // FTP upload til One.com
-    const client = new ftp.Client();
-    await client.access({
-        host: FTP_HOST,
-        user: FTP_USER,
-        password: FTP_PASS,
-        secure: false
-    });
-
-    await client.uploadFrom(excelBuffer, FTP_FILE_PATH);
-    client.close();
+// Læs Excel og returnér rækker
+function readExcel() {
+    ensureExcelExists();
+    const wb = XLSX.readFile(EXCEL_PATH);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(ws, { defval: "" });
 }
 
+// Skriv rækker til Excel
+function writeExcel(tasks) {
+    const rows = tasks.map(t => ({
+        ID: t.id,
+        Title: t.titel,
+        Description: t.beskrivelse,
+        Type: t.type,
+        Location: t.zone,
+        Radius: t.radius,
+        Latitude: t.latitude,
+        Longitude: t.longitude,
+        Options: t.options.join(","),
+        ActivationCondition: t.activationCondition,
+        Activated: t.activated,
+        Completed: t.completed,
+        Difficulty: t.difficulty
+    }));
 
-// ----------------------------------------------------
-// ExcelService API – bruges af taskService
-// ----------------------------------------------------
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
 
-// Returnerer rå JSON rækker fra Excel
-async function readTasks() {
-    return await readRawRows();
-}
-
-// Modtager Task-objekter og skriver rows tilbage
-async function writeTasks(tasks) {
-    // tasks er Task-objekter → vi konverterer dem til Excel-rækker
-    const rows = tasks.map(task => task.toExcelRow());
-    await writeRawRows(rows);
+    XLSX.utils.book_append_sheet(wb, ws, "Opgaver");
+    XLSX.writeFile(wb, EXCEL_PATH);
 }
 
 module.exports = {
-    readTasks,
-    writeTasks
+    readExcel,
+    writeExcel
 };
