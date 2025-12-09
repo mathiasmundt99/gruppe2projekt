@@ -1,4 +1,4 @@
-const Task = require("../models/task");
+const Task = require("../models/Task");
 const { readExcel, writeExcel } = require("./excelService");
 
 function getTasks() {

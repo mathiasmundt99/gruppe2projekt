@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const XLSX = require("xlsx");
-const Task = require("../models/task");
+const Task = require("../models/Task");
 
 const EXCEL_PATH = path.join("/data", "opgaver.xlsx");
 
