@@ -1,15 +1,12 @@
 {
   "name": "gruppe2projekt",
   "version": "1.0.0",
-  "description": "Opgavedatabase med Excel og JSON eksport",
+  "description": "Team 1 opgave database med Excel + API + simple frontend",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.19.0",
     "xlsx": "^0.18.5"
   }
 }

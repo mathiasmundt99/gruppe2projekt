@@ -1,146 +1,145 @@
-const express = require("express");
-const path = require("path");
-const cors = require("cors");
+// server.js — Node HTTP server uden Express
 
-const excelService = require("./excelService");
-const jsonService = require("./jsonService");
+const http = require("http");
+const url = require("url");
+const {
+    getAllTasks,
+    getTask,
+    createTask,
+    updateTask,
+    deleteTask,
+    exportTask
+} = require("./opgaveService");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
-app.use(cors());
-app.use(express.json()); // JSON body parsing
-app.use(express.static(path.join(__dirname, "public")));
-app.use("/exports", express.static(path.join(__dirname, "exports")));
-
-// Helper: efter ændringer → gem i Excel + opdater JSON
-function persistAndExport(tasks) {
-    excelService.saveTasks(tasks);
-    jsonService.exportTasksToJson(tasks);
+// CORS headers (gør det muligt for frontend + Team 2/3 at hente data)
+function setHeaders(res) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-// GET: alle opgaver
-app.get("/api/tasks", (req, res) => {
-    try {
-        const tasks = excelService.readTasks();
-        res.json(tasks);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Kunne ikke læse opgaver fra Excel" });
+const server = http.createServer((req, res) => {
+    setHeaders(res);
+
+    const parsedUrl = url.parse(req.url, true);
+    const path = parsedUrl.pathname;
+    const method = req.method;
+
+    // Preflight (til POST/PUT)
+    if (method === "OPTIONS") {
+        res.writeHead(204);
+        return res.end();
     }
-});
 
-// POST: opret ny opgave
-app.post("/api/tasks", (req, res) => {
-    try {
-        const tasks = excelService.readTasks();
-        const body = req.body;
-
-        const maxId = tasks.reduce((max, t) => (t.id > max ? t.id : max), 0);
-        const newTask = {
-            id: maxId + 1,
-            titel: body.titel || "",
-            beskrivelse: body.beskrivelse || "",
-            type: body.type || "land",
-            radius: body.radius || null,
-            zone: body.zone || "",
-            lokation: body.lokation || null,
-            options: body.options || [],
-            activationCondition: body.activationCondition || "",
-            activated: !!body.activated,
-            completed: !!body.completed,
-            difficulty: body.difficulty || "",
-            duration: body.duration || "",
-            latitude: body.latitude || null,
-            longitude: body.longitude || null
-        };
-
-        tasks.push(newTask);
-        persistAndExport(tasks);
-
-        res.status(201).json(newTask);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Kunne ikke oprette opgave" });
+    // -------------------------
+    // GET /opgaver
+    // -------------------------
+    if (method === "GET" && path === "/opgaver") {
+        const data = getAllTasks();
+        res.writeHead(200, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify(data));
     }
-});
 
-// PUT: opdater eksisterende opgave
-app.put("/api/tasks/:id", (req, res) => {
-    try {
-        const id = parseInt(req.params.id, 10);
-        const tasks = excelService.readTasks();
-        const idx = tasks.findIndex((t) => t.id === id);
+    // -------------------------
+    // GET /opgaver/:id
+    // -------------------------
+    const taskMatch = path.match(/^\/opgaver\/(\d+)$/);
+    if (method === "GET" && taskMatch) {
+        const id = taskMatch[1];
+        const task = getTask(id);
 
-        if (idx === -1) {
-            return res.status(404).json({ error: "Opgave ikke fundet" });
+        if (!task) {
+            res.writeHead(404);
+            return res.end("Not Found");
         }
 
-        const existing = tasks[idx];
-        const body = req.body;
-
-        const updated = {
-            ...existing,
-            titel: body.titel ?? existing.titel,
-            beskrivelse: body.beskrivelse ?? existing.beskrivelse,
-            type: body.type ?? existing.type,
-            radius: body.radius ?? existing.radius,
-            zone: body.zone ?? existing.zone,
-            lokation: body.lokation ?? existing.lokation,
-            options: body.options ?? existing.options,
-            activationCondition: body.activationCondition ?? existing.activationCondition,
-            activated: body.activated ?? existing.activated,
-            completed: body.completed ?? existing.completed,
-            difficulty: body.difficulty ?? existing.difficulty,
-            duration: body.duration ?? existing.duration,
-            latitude: body.latitude ?? existing.latitude,
-            longitude: body.longitude ?? existing.longitude
-        };
-
-        tasks[idx] = updated;
-        persistAndExport(tasks);
-
-        res.json(updated);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Kunne ikke opdatere opgave" });
+        res.writeHead(200, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify(task));
     }
-});
 
-// DELETE: slet opgave
-app.delete("/api/tasks/:id", (req, res) => {
-    try {
-        const id = parseInt(req.params.id, 10);
-        const tasks = excelService.readTasks();
-        const idx = tasks.findIndex((t) => t.id === id);
+    // -------------------------
+    // GET /opgaver/:id/export
+    // -------------------------
+    const exportMatch = path.match(/^\/opgaver\/(\d+)\/export$/);
+    if (method === "GET" && exportMatch) {
+        const id = exportMatch[1];
+        const data = exportTask(id);
 
-        if (idx === -1) {
-            return res.status(404).json({ error: "Opgave ikke fundet" });
+        if (!data) {
+            res.writeHead(404);
+            return res.end("Not Found");
         }
 
-        const deleted = tasks.splice(idx, 1)[0];
-        persistAndExport(tasks);
-
-        res.json({ message: "Opgave slettet", deleted });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Kunne ikke slette opgave" });
+        res.writeHead(200, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify(data));
     }
+
+    // -------------------------
+    // POST /opgaver
+    // -------------------------
+    if (method === "POST" && path === "/opgaver") {
+        let body = "";
+
+        req.on("data", chunk => (body += chunk));
+        req.on("end", () => {
+            const newTask = createTask(JSON.parse(body));
+            res.writeHead(201, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(newTask));
+        });
+
+        return;
+    }
+
+    // -------------------------
+    // PUT /opgaver/:id
+    // -------------------------
+    if (method === "PUT" && taskMatch) {
+        const id = taskMatch[1];
+        let body = "";
+
+        req.on("data", chunk => (body += chunk));
+        req.on("end", () => {
+            const updates = JSON.parse(body);
+            const updatedTask = updateTask(id, updates);
+
+            if (!updatedTask) {
+                res.writeHead(404);
+                return res.end("Not Found");
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(updatedTask));
+        });
+
+        return;
+    }
+
+    // -------------------------
+    // DELETE /opgaver/:id
+    // -------------------------
+    if (method === "DELETE" && taskMatch) {
+        const id = taskMatch[1];
+        const ok = deleteTask(id);
+
+        if (!ok) {
+            res.writeHead(404);
+            return res.end("Not Found");
+        }
+
+        res.writeHead(204);
+        return res.end();
+    }
+
+    // -------------------------
+    // Fallback
+    // -------------------------
+    res.writeHead(404);
+    res.end("Not Found");
 });
 
-// POST: tving eksport til JSON (fx manuelt fra UI hvis du vil)
-app.post("/api/export", (req, res) => {
-    try {
-        const tasks = excelService.readTasks();
-        jsonService.exportTasksToJson(tasks);
-        res.json({ message: "Eksporteret til opgaver.json" });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Kunne ikke eksportere til JSON" });
-    }
-});
+// Render bruger process.env.PORT
+const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`Server kører på http://localhost:${PORT}`);
+server.listen(PORT, () => {
+    console.log("Server running on port " + PORT);
 });
