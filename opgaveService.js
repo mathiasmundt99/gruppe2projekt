@@ -80,7 +80,7 @@ function exportAllTasks() {
 }
 
 function writeExportFile() {
-    const dirPath = path.join(__dirname, "../staticfiles");
+    const dirPath = path.join(__dirname, "staticfiles");
     const filePath = path.join(dirPath, "opgaver.json");
 
     // Opret mappe hvis den ikke findes
