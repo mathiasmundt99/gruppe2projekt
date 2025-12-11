@@ -4,6 +4,7 @@ const http = require("http");
 const url = require("url");
 const fs = require("fs");
 const path = require("path");
+const { writeExportFile } = require("./opgaveService");
 
 const {
     getAllTasks,
@@ -154,30 +155,9 @@ const server = http.createServer((req, res) => {
 });
 
 // ------------------------------------------------------
-// GENERATE STATIC FILE AT SERVER START
-// ------------------------------------------------------
-
-(function generateInitialExportFile() {
-    try {
-        const dirPath = path.join(__dirname, "staticfiles");
-        const filePath = path.join(dirPath, "opgaver.json");
-
-        if (!fs.existsSync(dirPath)) {
-            fs.mkdirSync(dirPath);
-        }
-
-        const tasks = exportAllTasks();
-        fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2), "utf8");
-
-        console.log("Static exportfil genereret ved serverstart:", filePath);
-    } catch (err) {
-        console.error("Fejl ved generering af export-fil:", err);
-    }
-})();
-
-// ------------------------------------------------------
 // Start server
 // ------------------------------------------------------
 
 const PORT = process.env.PORT || 3000;
+writeExportFile();
 server.listen(PORT, () => console.log("Server running on port " + PORT));
