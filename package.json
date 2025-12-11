@@ -4,7 +4,8 @@
   "description": "Team 1 opgave database med Excel + API + simple frontend",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "jest"
   },
   "dependencies": {
     "xlsx": "^0.18.5"
