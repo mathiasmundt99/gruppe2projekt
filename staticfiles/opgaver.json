@@ -1,0 +1,262 @@
+[
+  {
+    "id": 1,
+    "title": "Velkomst",
+    "description": "Start ved hovedindgangen til Nymindegablejren.",
+    "type": "Land",
+    "location": "Nymindegab, Hovedport",
+    "radius": 20,
+    "options": [
+      "Start",
+      "Læs historie først"
+    ],
+    "activationCondition": "Lokalitet",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Let",
+    "latitude": 8.2501,
+    "longitude": 55.7398
+  },
+  {
+    "id": 2,
+    "title": "Gamle forsvarsstilling",
+    "description": "Find hvilken type anlæg der tidligere lå her.",
+    "type": "Land",
+    "location": "Nymindegablejr",
+    "radius": 30,
+    "options": [
+      "Kanonstilling",
+      "Ammunitionsdepot",
+      "Lyttepost"
+    ],
+    "activationCondition": "Zone",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Øvet",
+    "latitude": 8.252,
+    "longitude": 55.7405
+  },
+  {
+    "id": 3,
+    "title": "Observation",
+    "description": "Hvad kan du se fra udkigspunktet?",
+    "type": "Land",
+    "location": "Udkigspunktet",
+    "radius": 25,
+    "options": [
+      "Indtrængningsrute",
+      "Skjult område",
+      "Ingen aktivitet"
+    ],
+    "activationCondition": "Lokalitet",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Svær",
+    "latitude": 8.2498,
+    "longitude": 55.7412
+  },
+  {
+    "id": 4,
+    "title": "Mistænkelig aktivitet",
+    "description": "Undersøg området ved Bygning B.",
+    "type": "Land",
+    "location": "BYG B",
+    "radius": 15,
+    "options": [
+      "Undersøg døren",
+      "Tjek spor",
+      "Afgiv melding"
+    ],
+    "activationCondition": "Lokalitet",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Let",
+    "latitude": 8.248,
+    "longitude": 55.748
+  },
+  {
+    "id": 5,
+    "title": "Historisk punkt",
+    "description": "Læs skiltet og svar på et spørgsmål.",
+    "type": "Land",
+    "location": "Historisk Punkt",
+    "radius": 10,
+    "options": [
+      "Årstal",
+      "Placeringens formål"
+    ],
+    "activationCondition": "Lokalitet",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Øvet",
+    "latitude": 8.2512,
+    "longitude": 55.7395
+  },
+  {
+    "id": 6,
+    "title": "Gennemsøg område",
+    "description": "Markér området som gennemsøgt.",
+    "type": "Land",
+    "location": "Markeret område",
+    "radius": 50,
+    "options": [
+      "Sikkert",
+      "Fundet genstand"
+    ],
+    "activationCondition": "Zone",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Svær",
+    "latitude": 8.253,
+    "longitude": 55.742
+  },
+  {
+    "id": 7,
+    "title": "Fund beslutning",
+    "description": "Du har fundet en genstand. Hvad gør du?",
+    "type": "Land",
+    "location": "Markeret område",
+    "radius": 10,
+    "options": [
+      "Afspær",
+      "Indberet",
+      "Undersøg"
+    ],
+    "activationCondition": "Afhængighed",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Let",
+    "latitude": 8.253,
+    "longitude": 55.742
+  },
+  {
+    "id": 8,
+    "title": "Start rute fra havn",
+    "description": "Sæt kurs mod første waypoint.",
+    "type": "Sø",
+    "location": "Havnebassin",
+    "radius": 100,
+    "options": [
+      "Kurs WP1",
+      "Sikkerhedstjek"
+    ],
+    "activationCondition": "Rute start",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Øvet",
+    "latitude": 8.5681,
+    "longitude": 56.1541
+  },
+  {
+    "id": 9,
+    "title": "Nødsignal mod nord",
+    "description": "Modtag nødsignal og reager.",
+    "type": "Sø",
+    "location": "Åben vand",
+    "radius": 500,
+    "options": [
+      "Sejl mod signal",
+      "Ignorer"
+    ],
+    "activationCondition": "Signal",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Svær",
+    "latitude": 8.6,
+    "longitude": 56.2
+  },
+  {
+    "id": 10,
+    "title": "Sigtet observation",
+    "description": "Hvad observeres i søgeområdet?",
+    "type": "Sø",
+    "location": "Åben vand",
+    "radius": 75,
+    "options": [
+      "Flåde",
+      "Person i vandet",
+      "Intet tegn"
+    ],
+    "activationCondition": "Radius",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Let",
+    "latitude": 8.62,
+    "longitude": 56.21
+  },
+  {
+    "id": 11,
+    "title": "Man over bord",
+    "description": "Marker og håndter muligt menneske i vandet.",
+    "type": "Sø",
+    "location": "Åben vand",
+    "radius": 30,
+    "options": [
+      "Optagning",
+      "Assistance",
+      "Markér position"
+    ],
+    "activationCondition": "Lokalitet",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Øvet",
+    "latitude": 8.63,
+    "longitude": 56.212
+  },
+  {
+    "id": 12,
+    "title": "Boarding kontrol",
+    "description": "Nær et fartøj der skal kontrolleres.",
+    "type": "Sø",
+    "location": "Åben vand",
+    "radius": 40,
+    "options": [
+      "Radiokontakt",
+      "Boarding",
+      "Afvent"
+    ],
+    "activationCondition": "Zone",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Svær",
+    "latitude": 8.64,
+    "longitude": 56.215
+  },
+  {
+    "id": 13,
+    "title": "Undvig objekt",
+    "description": "Reager på muligt minelignende objekt.",
+    "type": "Sø",
+    "location": "Åben vand",
+    "radius": 60,
+    "options": [
+      "Ændr kurs",
+      "Vurdér igen",
+      "Stop maskine"
+    ],
+    "activationCondition": "Radius",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Let",
+    "latitude": 8.65,
+    "longitude": 56.218
+  },
+  {
+    "id": 14,
+    "title": "Tilbage til havn",
+    "description": "Afslut missionen og returnér.",
+    "type": "Sø",
+    "location": "Åben vand",
+    "radius": 100,
+    "options": [
+      "Afslut",
+      "Debrief"
+    ],
+    "activationCondition": "Rute slut",
+    "activated": false,
+    "completed": false,
+    "difficulty": "Svær",
+    "latitude": 8.5681,
+    "longitude": 56.1541
+  }
+]

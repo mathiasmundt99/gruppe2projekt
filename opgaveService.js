@@ -1,6 +1,8 @@
 const { readExcel, writeExcel } = require("./services/excelService");
 const { exportToSharedJSON } = require("./services/jsonService");
 const Task = require("./services/Task");
+const fs = require("fs");
+const path = require("path");
 
 // GET alle opgaver
 function getAllTasks() {
@@ -30,6 +32,7 @@ function createTask(taskData) {
 
     tasks.push(newTask);
     writeExcel(tasks);
+    writeExportFile();
     return newTask;
 }
 
@@ -47,6 +50,7 @@ function updateTask(id, updates) {
 
     tasks[index] = updated;
     writeExcel(tasks);
+    writeExportFile();
     return updated;
 }
 
@@ -58,6 +62,7 @@ function deleteTask(id) {
     if (filtered.length === tasks.length) return false;
 
     writeExcel(filtered);
+    writeExportFile();
     return true;
 }
 
@@ -74,6 +79,24 @@ function exportAllTasks() {
     return tasks.map(task => task.toSharedJSON());
 }
 
+function writeExportFile() {
+    const dirPath = path.join(__dirname, "../staticfiles");
+    const filePath = path.join(dirPath, "opgaver.json");
+
+    // Opret mappe hvis den ikke findes
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+    }
+
+    // Hent alle tasks i shared format
+    const tasks = exportAllTasks();
+
+    // Skriv filen
+    fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2), "utf8");
+
+    console.log("Static exportfil opdateret:", filePath);
+}
+
 module.exports = {
     getAllTasks,
     getTask,
@@ -81,5 +104,6 @@ module.exports = {
     updateTask,
     deleteTask,
     exportTask,
+    writeExportFile,
     exportAllTasks
 };
