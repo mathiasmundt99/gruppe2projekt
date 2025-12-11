@@ -2,6 +2,25 @@ const { readExcel, writeExcel } = require("./services/excelService");
 const { exportToSharedJSON } = require("./services/jsonService");
 const Task = require("./services/Task");
 
+const fs = require("fs");
+const path = require("path");
+
+
+// ---------------------------------------
+// Hjælpefunktion: skriv eksportfil til /export/opgaver.json
+// ---------------------------------------
+function writeExportFile(tasks) {
+    // Konverter alle opgaver til shared format
+    const shared = tasks.map(t => exportToSharedJSON(t));
+
+    // Find sti til export-mappen
+    const exportPath = path.join(__dirname, "../export/opgaver.json");
+
+    // Skriv JSON-filen (smukt formatteret)
+    fs.writeFileSync(exportPath, JSON.stringify(shared, null, 2), "utf8");
+}
+
+
 // GET alle opgaver
 function getAllTasks() {
     return readExcel();
@@ -30,6 +49,8 @@ function createTask(taskData) {
 
     tasks.push(newTask);
     writeExcel(tasks);
+    writeExportFile(tasks);   // ← NY LINJE
+
     return newTask;
 }
 
@@ -47,6 +68,8 @@ function updateTask(id, updates) {
 
     tasks[index] = updated;
     writeExcel(tasks);
+    writeExportFile(tasks);   // ← NY LINJE
+
     return updated;
 }
 
@@ -58,6 +81,8 @@ function deleteTask(id) {
     if (filtered.length === tasks.length) return false;
 
     writeExcel(filtered);
+    writeExportFile(filtered);   // ← NY LINJE
+
     return true;
 }
 

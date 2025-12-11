@@ -2,6 +2,8 @@
 
 const http = require("http");
 const url = require("url");
+const fs = require("fs");
+const path = require("path");
 
 const {
     getAllTasks,
@@ -34,26 +36,43 @@ const server = http.createServer((req, res) => {
     setHeaders(res);
 
     const parsedUrl = url.parse(req.url, true);
-    const path = parsedUrl.pathname;
+    const pathName = parsedUrl.pathname;
     const method = req.method;
 
-    // Handle OPTIONS
+    // Handle OPTIONS (CORS preflight)
     if (method === "OPTIONS") {
         res.writeHead(204);
         return res.end();
     }
 
+    // ------------------------------------------------------
+    // SERVE STATIC EXPORT FILES
+    // ------------------------------------------------------
+    if (method === "GET" && pathName.startsWith("/export/")) {
+
+        // vigtig rettelse: path.resolve så Render finder filen korrekt
+        const filePath = path.resolve(__dirname, ".." + pathName);
+
+        if (fs.existsSync(filePath)) {
+            const file = fs.readFileSync(filePath);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            return res.end(file);
+        }
+
+        return notFound(res);
+    }
+
     // -------------------------
     // GET /opgaver
     // -------------------------
-    if (method === "GET" && path === "/opgaver") {
+    if (method === "GET" && pathName === "/opgaver") {
         return sendJSON(res, getAllTasks());
     }
 
     // -------------------------
     // GET /opgaver/:id
     // -------------------------
-    const taskMatch = path.match(/^\/opgaver\/(\d+)$/);
+    const taskMatch = pathName.match(/^\/opgaver\/(\d+)$/);
     if (method === "GET" && taskMatch) {
         const id = Number(taskMatch[1]);
         const task = getTask(id);
@@ -62,16 +81,16 @@ const server = http.createServer((req, res) => {
     }
 
     // -------------------------
-    // GET /export
+    // GET /export     (API format)
     // -------------------------
-    if (method === "GET" && path === "/export") {
+    if (method === "GET" && pathName === "/export") {
         return sendJSON(res, exportAllTasks());
     }
 
     // -------------------------
-    // GET /export/:id
+    // GET /export/:id (API format)
     // -------------------------
-    const exportMatch = path.match(/^\/export\/(\d+)$/);
+    const exportMatch = pathName.match(/^\/export\/(\d+)$/);
     if (method === "GET" && exportMatch) {
         const id = Number(exportMatch[1]);
         const data = exportTask(id);
@@ -82,7 +101,7 @@ const server = http.createServer((req, res) => {
     // -------------------------
     // POST /opgaver
     // -------------------------
-    if (method === "POST" && path === "/opgaver") {
+    if (method === "POST" && pathName === "/opgaver") {
         let body = "";
         req.on("data", chunk => (body += chunk));
         req.on("end", () => {
@@ -119,6 +138,21 @@ const server = http.createServer((req, res) => {
     // Fallback
     notFound(res);
 });
+
+// ------------------------------------------------------
+// ⭐ LØSNING 1: GENERÉR JSON-FILEN VED SERVERSTART ⭐
+// ------------------------------------------------------
+
+try {
+    const exportPath = path.join(__dirname, "export/opgaver.json");
+    const tasks = exportAllTasks();
+
+    fs.writeFileSync(exportPath, JSON.stringify(tasks, null, 2), "utf8");
+
+    console.log("Exportfil genereret ved serverstart:", exportPath);
+} catch (err) {
+    console.error("Fejl ved generering af export-fil:", err);
+}
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log("Server running on port " + PORT));
