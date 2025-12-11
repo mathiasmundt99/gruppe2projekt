@@ -22,7 +22,7 @@ function writeExcel(tasks) {
         Type: task.Type,
         Location: task.Location,
         Radius: task.Radius,
-        Options: task.Options,
+        Options: Array.isArray(task.Options) ? task.Options.join(";") : task.Options,
         ActivationCondition: task.ActivationCondition,
         Activated: task.Activated,
         Completed: task.Completed,
