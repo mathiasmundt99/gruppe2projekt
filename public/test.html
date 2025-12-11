@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="test"></div>
+    <script>
+      async function FetchTest() {
+        try {
+          const response = await fetch(
+            "https://gruppe2-opgaver.onrender.com/export"
+          );
+          const result = await response.json();
+
+          const container = document.getElementById("test");
+
+          result.forEach((item) => {
+            const div = document.createElement("div");
+            div.innerHTML = `
+    <p>ID: ${item.id}</p>
+    <p>Navn: ${item.title}</p>
+    <hr>
+  `;
+            container.appendChild(div);
+          });
+          console.log(JSON.stringify(result, null, 2));
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+
+      FetchTest();
+    </script>
+  </body>
+</html>
