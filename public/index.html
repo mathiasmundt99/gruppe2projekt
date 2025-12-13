@@ -4,26 +4,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Opgave Manager</title>
+    <!-- Egne styles og javascript filer -->
+    <script defer src="script.js"></script>
     <link rel="stylesheet" href="styles.css" />
+    <!-- google material icons -->
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <!-- det danske designsystem filer -->
     <link rel="stylesheet" href="./dkfds/dist/css/dkfds.css" />
     <script src="./dkfds/dist/js/dkfds.js"></script>
-    <script defer src="script.js"></script>
   </head>
   <body>
     <header>
-      <img src="./assets/logo-red.svg" alt="Logo" />
-      <span>OPGAVEDATABASE</span>
-    </header>
-    <section class="search-button">
-      <div class="mb-7">
+      <div class="logo">
+        <img src="./assets/logo-red.svg" alt="Logo" />
+        <span>OPGAVEDATABASE</span>
+      </div>
+      <div>
         <button class="button button-secondary">
           <span class="material-symbols-outlined">search</span>
         </button>
       </div>
-    </section>
+    </header>
+    <!-- modal med opret ny opgave -->
     <div
       class="fds-modal"
       id="open"
@@ -33,7 +37,9 @@
       aria-labelledby="modal-example-heading">
       <div class="modal-content">
         <div class="modal-header">
-          <h2 class="modal-title" id="modal-example-heading">Ny Opgave</h2>
+          <h2 class="modal-title" id="modal-example-heading">
+            Opret ny opgave
+          </h2>
           <button class="modal-close function-link" data-modal-close>
             <span class="material-symbols-outlined">close</span>
             Luk
@@ -41,8 +47,6 @@
         </div>
 
         <div class="modal-body">
-          <h2>Opret ny opgave</h2>
-
           <label>Title:</label>
           <input id="title" type="text" />
 
@@ -93,15 +97,18 @@
           <button class="button button-secondary" onclick="createTask()">
             OPRET OPGAVE
           </button>
-          <button id="updateBtn" onclick="updateTask()" style="display: none">
+          <button
+            id="updateBtn"
+            class="button button-secondary"
+            onclick="updateTask()"
+            style="display: none">
             Gem ændringer
           </button>
         </div>
       </div>
     </div>
 
-    <h2>Eksisterende opgaver</h2>
-
+    <!-- tabel med nuværende opgaver -->
     <div>
       <p
         aria-live="polite"
@@ -123,6 +130,7 @@
               <th>Options</th>
               <th>Latitude</th>
               <th>Longitude</th>
+              <th id="edit">Handlinger</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -153,8 +161,8 @@
       </div>
     </div>
 
-    <div id="task-list"></div>
-    <footer>
+    <!-- footer -->
+    <footer class="global-footer">
       <div>
         <a
           class="button-primary button"
@@ -169,7 +177,8 @@
           class="button button-secondary"
           data-module="modal"
           data-target="open"
-          aria-haspopup="dialog">
+          aria-haspopup="dialog"
+          onclick="clearForm()">
           <span class="material-symbols-outlined"> add </span>
           NY OPGAVE
         </button>

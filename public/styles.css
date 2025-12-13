@@ -53,11 +53,18 @@ button {
 header{
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+}
+
+header .logo{
+    display: flex;
+    align-items: center;
     justify-content: left;
     gap: 10px;
 }
 
-header span{
+header .logo span{
     font-weight: bold;
     color: var(--primary-red);
     font-size: 1rem;
@@ -70,7 +77,7 @@ header span{
 
 /* modal */
 
-.fds-modal{
+/* .fds-modal{
     border: 1px black solid;
     width: 80%;
     max-height: 80vh;
@@ -91,10 +98,10 @@ header span{
   flex: 1 1 auto !important;
   overflow-y: auto !important; 
   padding-right: 1rem !important;
-}
+} */
 
 /* footer */
-footer{
+.global-footer{
     display: flex;
     justify-content: space-around;
     position: fixed;
@@ -127,6 +134,14 @@ footer{
     padding: 10px;
     margin-bottom: 5px;
     border-radius: 6px;
+}
+
+#task-table td[data-title="Handlinger"] {
+    display: flex;         
+    gap: 0.5rem;            
+    justify-content: flex-start; 
+    align-items: left;  
+    flex-direction: column;  
 }
 
 @media (min-width:1024px){

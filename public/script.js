@@ -36,14 +36,33 @@ async function loadTasks() {
         tr.appendChild(td);
     });
 
-    document.querySelector("#task-table tbody").appendChild(tr);
+     const actionTd = document.createElement("td");
+    actionTd.setAttribute("data-title", "Handlinger");
+
+    const deleteBtn = document.createElement("button");
+    const editBtn = document.createElement("button");
+
+    deleteBtn.className = "button button-primary";
+    editBtn.className = "button button-secondary";
+
+    deleteBtn.textContent = "Slet";
+    editBtn.textContent = "Rediger";
+
+    deleteBtn.onclick = () => deleteTask(task.ID);
+    editBtn.onclick = () => startEdit(task.ID);
+
+    actionTd.appendChild(editBtn);
+    actionTd.appendChild(deleteBtn);
+
+    tr.appendChild(actionTd);
+    tbody.appendChild(tr);
 });
 }
 
 // Opret opgave
 async function createTask() {
     const task = getFormData();
-    await fetch(`${API_URL}/opgaver`, {
+    await fetch(`${API_URL}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(task)
@@ -57,13 +76,13 @@ async function createTask() {
 async function deleteTask(id) {
     if (!confirm("Er du sikker på, at du vil slette denne opgave?")) return;
 
-    await fetch(`${API_URL}/opgaver/${id}`, { method: "DELETE" });
+    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
     loadTasks();
 }
 
 // Start redigering af opgave
 async function startEdit(id) {
-    const res = await fetch(`${API_URL}/opgaver/${id}`);
+    const res = await fetch(`${API_URL}/${id}`);
     const task = await res.json();
 
     // Udfyld formular
@@ -86,13 +105,19 @@ async function startEdit(id) {
     editID = id;
     document.querySelector('button[onclick="createTask()"]').style.display = "none";
     document.getElementById("updateBtn").style.display = "block";
+
+    // Åbn modal
+    const modal = document.getElementById("open");
+modal.setAttribute("aria-hidden", "false");
+modal.classList.add("fds-modal--open");
+
 }
 
 // Gem ændringer
 async function updateTask() {
     const updated = getFormData();
 
-    await fetch(`${API_URL}/opgaver/${editID}`, {
+    await fetch(`${API_URL}/${editID}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated)
@@ -100,6 +125,11 @@ async function updateTask() {
 
     clearForm();
     loadTasks();
+
+    // Luk modal
+    const modal = document.getElementById("open");
+    modal.setAttribute("aria-hidden", "true");
+    modal.classList.remove("fds-modal--open");
 
     // Gå tilbage til opret-tilstand
     editMode = false;
@@ -146,3 +176,10 @@ function clearForm() {
 }
 
 window.onload = loadTasks;
+document.querySelectorAll("[data-modal-close]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const modal = btn.closest(".fds-modal");
+        modal.setAttribute("aria-hidden", "true");
+        modal.classList.remove("fds-modal--open");
+    });
+});
