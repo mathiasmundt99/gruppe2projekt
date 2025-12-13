@@ -1,45 +1,43 @@
-const API_URL = "https://gruppe2-opgaver.onrender.com";
+document.addEventListener("DOMContentLoaded", function() {
+    DKFDS.init();
+    loadTasks();
+});
+
+const API_URL = "https://gruppe2-opgaver.onrender.com/opgaver";
 
 let editMode = false;
 let editID = null;
 
 // Hent alle opgaver
 async function loadTasks() {
-    const res = await fetch(`${API_URL}/opgaver`);
+    const res = await fetch(API_URL);
     const tasks = await res.json();
 
-    const list = document.getElementById("task-list");
-    list.innerHTML = "";
+    const tbody = document.querySelector("#task-table tbody");
+    tbody.innerHTML = ""; 
 
     tasks.forEach(task => {
-        const div = document.createElement("div");
-        div.className = "task";
+    const tr = document.createElement("tr");
 
-        let html = `
-            <h3>${task.Title}</h3>
-            <p>${task.Description}</p>
-            <ul>
-        `;
+    const columns = [
+        { label: "ID", value: task.ID },
+        { label: "Title", value: task.Title },
+        { label: "Type", value: task.Type },
+        { label: "Location", value: task.Location },
+        { label: "Options", value: Array.isArray(task.Options) ? task.Options.join(", ") : task.Options },
+        { label: "Latitude", value: task.Latitude },
+        { label: "Longitude", value: task.Longitude }
+    ];
 
-        for (const key in task) {
-            let value = task[key];
-
-            if (Array.isArray(value)) {
-                value = value.join(", ");
-            }
-
-            html += `<li><strong>${key}:</strong> ${value}</li>`;
-        }
-
-        html += `
-            </ul>
-            <button onclick="startEdit(${task.ID})">Rediger</button>
-            <button onclick="deleteTask(${task.ID})" style="margin-left:10px;">Slet</button>
-        `;
-
-        div.innerHTML = html;
-        list.appendChild(div);
+    columns.forEach(col => {
+        const td = document.createElement("td");
+        td.setAttribute("data-title", col.label);
+        td.textContent = col.value;
+        tr.appendChild(td);
     });
+
+    document.querySelector("#task-table tbody").appendChild(tr);
+});
 }
 
 // Opret opgave

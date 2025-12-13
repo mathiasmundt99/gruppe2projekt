@@ -1,70 +1,179 @@
 <!DOCTYPE html>
 <html lang="da">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Opgave Manager</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
-    <h1>Opgaver</h1>
-
-    <section id="task-form">
-        <h2>Opret ny opgave</h2>
-
-        <label>Title:</label>
-        <input id="title" type="text">
-
-        <label>Description:</label>
-        <input id="description" type="text">
-
-        <label>Type:</label>
-        <input id="type" type="text">
-
-        <label>Location:</label>
-        <input id="location" type="text">
-
-        <label>Radius:</label>
-        <input id="radius" type="number">
-
-        <label>Latitude:</label>
-        <input id="latitude" type="number" step="any">
-
-        <label>Longitude:</label>
-        <input id="longitude" type="number" step="any">
-        
-        <label>Handlinger (adskilt af ;)</label>
-        <input id="options" placeholder="Start;Stop;Læs videre">
-
-        <label>Activation Condition</label>
-        <input id="activationCondition" placeholder="Lokalitet">
-
-        <label>Activated</label>
-        <select id="activated">
-            <option value="false">False</option>
-            <option value="true">True</option>
-        </select>
-
-        <label>Completed</label>
-        <select id="completed">
-            <option value="false">False</option>
-            <option value="true">True</option>
-        </select>
-
-        <label>Difficulty</label>
-        <input id="difficulty" placeholder="Let / Mellem / Svær">
-
-        <button onclick="createTask()">Opret opgave</button>
-        <button id="updateBtn" onclick="updateTask()" style="display:none;">Gem ændringer</button>
-
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link rel="stylesheet" href="./dkfds/dist/css/dkfds.css" />
+    <script src="./dkfds/dist/js/dkfds.js"></script>
+    <script defer src="script.js"></script>
+  </head>
+  <body>
+    <header>
+      <img src="./assets/logo-red.svg" alt="Logo" />
+      <span>OPGAVEDATABASE</span>
+    </header>
+    <section class="search-button">
+      <div class="mb-7">
+        <button class="button button-secondary">
+          <span class="material-symbols-outlined">search</span>
+        </button>
+      </div>
     </section>
+    <div
+      class="fds-modal"
+      id="open"
+      aria-hidden="true"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-example-heading">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modal-example-heading">Ny Opgave</h2>
+          <button class="modal-close function-link" data-modal-close>
+            <span class="material-symbols-outlined">close</span>
+            Luk
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <h2>Opret ny opgave</h2>
+
+          <label>Title:</label>
+          <input id="title" type="text" />
+
+          <label>Description:</label>
+          <input id="description" type="text" />
+
+          <label>Type:</label>
+          <input id="type" type="text" />
+
+          <label>Location:</label>
+          <input id="location" type="text" />
+
+          <label>Radius:</label>
+          <input id="radius" type="number" />
+
+          <label>Latitude:</label>
+          <input id="latitude" type="number" step="any" />
+
+          <label>Longitude:</label>
+          <input id="longitude" type="number" step="any" />
+
+          <label>Handlinger (adskilt af ;)</label>
+          <input id="options" placeholder="Start;Stop;Læs videre" />
+
+          <label>Activation Condition</label>
+          <input id="activationCondition" placeholder="Lokalitet" />
+
+          <label>Activated</label>
+          <select id="activated">
+            <option value="false">False</option>
+            <option value="true">True</option>
+          </select>
+
+          <label>Completed</label>
+          <select id="completed">
+            <option value="false">False</option>
+            <option value="true">True</option>
+          </select>
+
+          <label>Difficulty</label>
+          <input id="difficulty" placeholder="Let / Mellem / Svær" />
+        </div>
+
+        <div class="modal-footer">
+          <button class="button button-primary" onclick="clearForm()">
+            ANNULLER
+          </button>
+          <button class="button button-secondary" onclick="createTask()">
+            OPRET OPGAVE
+          </button>
+          <button id="updateBtn" onclick="updateTask()" style="display: none">
+            Gem ændringer
+          </button>
+        </div>
+      </div>
+    </div>
 
     <h2>Eksisterende opgaver</h2>
-    <a href="https://gruppe2-opgaver.onrender.com/staticfiles/opgaver.json" download>
-    Download JSON
-</a>
-    <div id="task-list"></div>
 
-    <script src="script.js"></script>
-</body>
+    <div>
+      <p
+        aria-live="polite"
+        aria-atomic="true"
+        class="rows-message"
+        id="table-pagination-message">
+        Viser <strong class="displayed-rows">1-10</strong> af
+        <strong class="total-rows">0</strong> rækker
+      </p>
+
+      <div class="table--responsive-scroll" tabindex="0">
+        <table class="table table--responsive-headers" id="task-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Location</th>
+              <th>Options</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="table-pagination-options">
+        <div class="form-group">
+          <label class="form-label" for="pagination-pages"
+            >Vis rækker per side:</label
+          >
+          <select class="form-select" id="pagination-pages">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="all">Alle</option>
+          </select>
+        </div>
+
+        <div
+          role="group"
+          class="table-pagination"
+          aria-label="Skift side i tabellen">
+          <button class="button button-arrow" id="prev-page">Forrige</button>
+          <span class="pagination-mobile" id="current-page">Side 1</span>
+          <button class="button button-arrow" id="next-page">Næste</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="task-list"></div>
+    <footer>
+      <div>
+        <a
+          class="button-primary button"
+          href="https://gruppe2-opgaver.onrender.com/staticfiles/opgaver.json"
+          download>
+          <span class="material-symbols-outlined"> download </span>
+          EKSPORTER LISTE
+        </a>
+      </div>
+      <div>
+        <button
+          class="button button-secondary"
+          data-module="modal"
+          data-target="open"
+          aria-haspopup="dialog">
+          <span class="material-symbols-outlined"> add </span>
+          NY OPGAVE
+        </button>
+      </div>
+    </footer>
+  </body>
 </html>
