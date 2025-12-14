@@ -306,8 +306,6 @@ function clearForm() {
 
 }
 
-window.onload = loadTasks;
-
 // addEventListeners
 document.querySelectorAll("[data-modal-close]").forEach(btn => {
     btn.addEventListener("click", () => {
