@@ -101,6 +101,27 @@ header .logo span{
   padding-right: 1rem !important;
 } */
 
+.fds-modal .modal-body {
+  max-height: 50vh; 
+  overflow-y: auto; 
+}
+
+.fds-modal .modal-footer {
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap; /* knapper på flere rækker på små skærme */
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+  border-top: 1px solid #ddd; /* evt. separation */
+}
+
+
+body.modal-open {
+  overflow: hidden; 
+}
+
+
 /* tabel */
 th button{
     background-color: transparent !important;
@@ -118,36 +139,6 @@ th button{
     background-color: var(--white);
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     align-items: center;
-}
-
-#task-form {
-    margin-bottom: 30px;
-    padding: 15px;
-    width: 300px;
-    border: 1px solid #aaa;
-    border-radius: 8px;
-}
-
-#task-form input {
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 6px;
-}
-
-
-.task {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 5px;
-    border-radius: 6px;
-}
-
-#task-table td[data-title="Handlinger"] {
-    display: flex;         
-    gap: 0.5rem;            
-    justify-content: flex-start; 
-    align-items: left;  
-    flex-direction: column;  
 }
 
 @media (min-width:1024px){

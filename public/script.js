@@ -170,15 +170,40 @@ async function createTask() {
     loadTasks();
 }
 
-// DELETE opgave
-async function deleteTask(id) {
-    if (!confirm("Er du sikker på, at du vil slette denne opgave?")) return;
+// åben modal
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.add("fds-modal--open");
+    modal.setAttribute("aria-hidden", "false");
 
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-    loadTasks();
+     document.body.classList.add("modal-open");
 }
 
-// Start redigering af opgave
+// luk modal
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.remove("fds-modal--open");
+    modal.setAttribute("aria-hidden", "true");
+
+    document.body.classList.remove("modal-open");
+}
+
+// modal specifikt til opret opgave
+function openCreateModal() {
+    clearForm();
+
+    document.getElementById("modal-example-heading").textContent = "Opret ny opgave";
+
+    document.querySelector('button[onclick="createTask()"]').style.display = "block";
+    document.getElementById("updateBtn").style.display = "none";
+
+
+    const modal = document.getElementById("open");
+    modal.classList.add("fds-modal--open");
+    modal.setAttribute("aria-hidden", "false");
+}
+
+// rediger opgave
 async function startEdit(id) {
     const res = await fetch(`${API_URL}/${id}`);
     const task = await res.json();
@@ -197,18 +222,26 @@ async function startEdit(id) {
     document.getElementById("completed").value = task.Completed ? "true" : "false";
     document.getElementById("difficulty").value = task.Difficulty;
 
-
     // Skift UI til rediger-tilstand
     editMode = true;
     editID = id;
+
+    // Sæt overskrift
+    document.getElementById("modal-example-heading").textContent = "Rediger opgave";
+
+    // Vis/skjul knapper
     document.querySelector('button[onclick="createTask()"]').style.display = "none";
     document.getElementById("updateBtn").style.display = "block";
 
-    // Åbn modal
-    const modal = document.getElementById("open");
-modal.setAttribute("aria-hidden", "false");
-modal.classList.add("fds-modal--open");
+   openModal("open");
+}
 
+// DELETE opgave
+async function deleteTask(id) {
+    if (!confirm("Er du sikker på, at du vil slette denne opgave?")) return;
+
+    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    loadTasks();
 }
 
 // Gem ændringer
