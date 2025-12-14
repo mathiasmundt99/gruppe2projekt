@@ -7,56 +7,73 @@ const API_URL = "https://gruppe2-opgaver.onrender.com/opgaver";
 
 let editMode = false;
 let editID = null;
+let allTasks = [];
 
 // Hent alle opgaver
 async function loadTasks() {
     const res = await fetch(API_URL);
-    const tasks = await res.json();
+    allTasks = await res.json();
+    renderTasks(allTasks);
+}
 
-    const tbody = document.querySelector("#task-table tbody");
-    tbody.innerHTML = ""; 
+// Opret alle opgaver
+function renderTasks(tasks) {
+   const tbody = document.querySelector("#task-table tbody");
+    tbody.innerHTML = "";
 
     tasks.forEach(task => {
-    const tr = document.createElement("tr");
+        const tr = document.createElement("tr");
 
-    const columns = [
-        { label: "ID", value: task.ID },
-        { label: "Title", value: task.Title },
-        { label: "Type", value: task.Type },
-        { label: "Location", value: task.Location },
-        { label: "Options", value: Array.isArray(task.Options) ? task.Options.join(", ") : task.Options },
-        { label: "Latitude", value: task.Latitude },
-        { label: "Longitude", value: task.Longitude }
-    ];
+        const columns = [
+            { label: "ID", value: task.ID },
+            { label: "Title", value: task.Title },
+            { label: "Type", value: task.Type },
+            { label: "Location", value: task.Location },
+            { label: "Options", value: Array.isArray(task.Options) ? task.Options.join(", ") : task.Options },
+            { label: "Latitude", value: task.Latitude },
+            { label: "Longitude", value: task.Longitude }
+        ];
 
-    columns.forEach(col => {
-        const td = document.createElement("td");
-        td.setAttribute("data-title", col.label);
-        td.textContent = col.value;
-        tr.appendChild(td);
-    });
+        columns.forEach(col => {
+            const td = document.createElement("td");
+            td.setAttribute("data-title", col.label);
+            td.textContent = col.value;
+            tr.appendChild(td);
+        });
 
-     const actionTd = document.createElement("td");
-    actionTd.setAttribute("data-title", "Handlinger");
+        const actionTd = document.createElement("td");
 
-    const deleteBtn = document.createElement("button");
-    const editBtn = document.createElement("button");
+        const deleteBtn = document.createElement("button");
+        const editBtn = document.createElement("button");
 
-    deleteBtn.className = "button button-primary";
-    editBtn.className = "button button-secondary";
+        deleteBtn.className = "button button-primary";
+        editBtn.className = "button button-secondary";
 
-    deleteBtn.textContent = "Slet";
-    editBtn.textContent = "Rediger";
+        deleteBtn.textContent = "Slet";
+        editBtn.textContent = "Rediger";
 
-    deleteBtn.onclick = () => deleteTask(task.ID);
-    editBtn.onclick = () => startEdit(task.ID);
+        deleteBtn.onclick = () => deleteTask(task.ID);
+        editBtn.onclick = () => startEdit(task.ID);
 
-    actionTd.appendChild(editBtn);
-    actionTd.appendChild(deleteBtn);
+        actionTd.appendChild(editBtn);
+        actionTd.appendChild(deleteBtn);
+        tr.appendChild(actionTd);
 
-    tr.appendChild(actionTd);
-    tbody.appendChild(tr);
-});
+        tbody.appendChild(tr);
+        });
+}
+
+// søgefunktion
+function searchTasks(){
+    const searchValue = document.getElementById("search-input").value.toLowerCase();
+
+    const filteredTasks = allTasks.filter(task => 
+        task.Title.toLowerCase().includes(searchValue) ||
+        task.Type.toLowerCase().includes(searchValue) ||
+        task.Location.toLowerCase().includes(searchValue)
+    );
+
+    renderTasks(filteredTasks)
 }
 
 // Opret opgave
@@ -183,3 +200,5 @@ document.querySelectorAll("[data-modal-close]").forEach(btn => {
         modal.classList.remove("fds-modal--open");
     });
 });
+
+document.getElementById("search-btn").addEventListener("click", searchTasks)
