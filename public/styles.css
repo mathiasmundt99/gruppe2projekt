@@ -101,6 +101,11 @@ header .logo span{
   padding-right: 1rem !important;
 } */
 
+/* tabel */
+th button{
+    background-color: transparent !important;
+}
+
 /* footer */
 .global-footer{
     display: flex;

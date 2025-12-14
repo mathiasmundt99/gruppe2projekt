@@ -8,12 +8,19 @@ const API_URL = "https://gruppe2-opgaver.onrender.com/opgaver";
 let editMode = false;
 let editID = null;
 let allTasks = [];
+let currentPage = 1;
+let rowsPerPage = 10;
+let filteredTasks = [];
+let sortColumn = null;
+let sortDirection = "asc";
 
 // Hent alle opgaver
 async function loadTasks() {
-    const res = await fetch(API_URL);
+   const res = await fetch(API_URL);
     allTasks = await res.json();
-    renderTasks(allTasks);
+    filteredTasks = allTasks;
+    currentPage = 1;
+    renderPaginatedTasks();
 }
 
 // Opret alle opgaver
@@ -64,16 +71,90 @@ function renderTasks(tasks) {
 }
 
 // søgefunktion
-function searchTasks(){
+function searchTasks() {
     const searchValue = document.getElementById("search-input").value.toLowerCase();
 
-    const filteredTasks = allTasks.filter(task => 
+    filteredTasks = allTasks.filter(task => 
         task.Title.toLowerCase().includes(searchValue) ||
         task.Type.toLowerCase().includes(searchValue) ||
         task.Location.toLowerCase().includes(searchValue)
     );
 
-    renderTasks(filteredTasks)
+    currentPage = 1;
+    renderPaginatedTasks();
+}
+
+// pagination
+function renderPaginatedTasks() {
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    const paginatedTasks = filteredTasks.slice(start, end);
+
+    renderTasks(paginatedTasks);
+    updatePaginationInfo();
+}
+
+// opdater pagination info på frontenden
+function updatePaginationInfo() {
+    const total = filteredTasks.length;
+    const start = total === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+    const end = Math.min(start + rowsPerPage - 1, total);
+
+    document.querySelector(".displayed-rows").textContent = `${start}-${end}`;
+    document.querySelector(".total-rows").textContent = total;
+    document.getElementById("current-page").textContent = `Side ${currentPage}`;
+}
+
+// sorter kolonner  i tabel
+function sortTasks(column) {
+    if (sortColumn === column) {
+        sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    } else {
+        sortColumn = column;
+        sortDirection = "asc";
+    }
+
+    filteredTasks.sort((a, b) => {
+        let valueA = a[column];
+        let valueB = b[column];
+
+        if (column === "ID") {
+            return sortDirection === "asc"
+                ? valueA - valueB
+                : valueB - valueA;
+        }
+
+        valueA = valueA.toLowerCase();
+        valueB = valueB.toLowerCase();
+
+        if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+        if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+    });
+
+    currentPage = 1;
+    renderPaginatedTasks();
+    updateSortIcons();
+}
+
+// opdater sorter ikon 
+function updateSortIcons() {
+    document.querySelectorAll("th button").forEach(btn => {
+        const span = btn.querySelector("span");
+        if (span) {
+            span.textContent = "unfold_more";
+        }
+    });
+
+    const activeBtn = document.querySelector(`[data-sort="${sortColumn}"]`);
+    if (!activeBtn) return;
+
+    const activeSpan = activeBtn.querySelector("span");
+    if (!activeSpan) return;
+
+    activeSpan.textContent =
+        sortDirection === "asc" ? "keyboard_arrow_up" : "keyboard_arrow_down";
 }
 
 // Opret opgave
@@ -193,6 +274,8 @@ function clearForm() {
 }
 
 window.onload = loadTasks;
+
+// addEventListeners
 document.querySelectorAll("[data-modal-close]").forEach(btn => {
     btn.addEventListener("click", () => {
         const modal = btn.closest(".fds-modal");
@@ -201,4 +284,40 @@ document.querySelectorAll("[data-modal-close]").forEach(btn => {
     });
 });
 
+// klik på søgeknap
 document.getElementById("search-btn").addEventListener("click", searchTasks)
+
+// forrige side pagination knap
+document.getElementById("prev-page").addEventListener("click", () => {
+    if (currentPage > 1) {
+        currentPage--;
+        renderPaginatedTasks();
+    }
+});
+
+// næste side pagination knap
+document.getElementById("next-page").addEventListener("click", () => {
+    const maxPages = Math.ceil(filteredTasks.length / rowsPerPage);
+
+    if (currentPage < maxPages) {
+        currentPage++;
+        renderPaginatedTasks();
+    }
+});
+
+// ændring af hvor mange opgaver man vil se på hver side
+document.getElementById("pagination-pages").addEventListener("change", (e) => {
+    rowsPerPage = e.target.value === "all"
+        ? Infinity
+        : Number(e.target.value);
+
+    currentPage = 1;
+    renderPaginatedTasks();
+});
+
+document.querySelectorAll("th button[data-sort]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        sortTasks(btn.dataset.sort);
+    });
+});
+
