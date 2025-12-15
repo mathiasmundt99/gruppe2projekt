@@ -131,9 +131,8 @@ th button{
     background-color: transparent !important;
 }
 
-/* HVORFOR KAN JEG IKKE ÆNDRE DET HER */
 .table td, .table th {
-    border-bottom: 8px solid black;
+    border-bottom: 8px solid var(--green-60) !important;
 }
 
 /* footer */
@@ -227,6 +226,10 @@ th button{
     min-width: 140px;
     margin-left: 4px;
   }
+
+  .table td, .table th {
+    border-bottom: 0px !important;
+}
 
   .actions-trigger {
     padding: 8px;
