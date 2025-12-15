@@ -25,50 +25,92 @@ async function loadTasks() {
 
 // Opret alle opgaver
 function renderTasks(tasks) {
-   const tbody = document.querySelector("#task-table tbody");
-    tbody.innerHTML = "";
+  const tbody = document.querySelector("#task-table tbody");
+  tbody.innerHTML = "";
 
-    tasks.forEach(task => {
-        const tr = document.createElement("tr");
+  tasks.forEach(task => {
+    const tr = document.createElement("tr");
 
-        const columns = [
-            { label: "ID", value: task.ID },
-            { label: "Title", value: task.Title },
-            { label: "Type", value: task.Type },
-            { label: "Location", value: task.Location },
-            { label: "Options", value: Array.isArray(task.Options) ? task.Options.join(", ") : task.Options },
-            { label: "Latitude", value: task.Latitude },
-            { label: "Longitude", value: task.Longitude }
-        ];
+    const columns = [
+      { label: "ID", value: task.ID },
+      { label: "Title", value: task.Title },
+      { label: "Type", value: task.Type },
+      { label: "Location", value: task.Location },
+      { label: "Options", value: Array.isArray(task.Options) ? task.Options.join(", ") : task.Options },
+      { label: "Latitude", value: task.Latitude },
+      { label: "Longitude", value: task.Longitude }
+    ];
 
-        columns.forEach(col => {
-            const td = document.createElement("td");
-            td.setAttribute("data-title", col.label);
-            td.textContent = col.value;
-            tr.appendChild(td);
-        });
+    columns.forEach(col => {
+      const td = document.createElement("td");
+      td.setAttribute("data-title", col.label);
+      td.textContent = col.value;
+      tr.appendChild(td);
+    });
 
-        const actionTd = document.createElement("td");
+    // === ACTIONS (3 DOT MENU) ===
+    const actionTd = document.createElement("td");
+    actionTd.className = "actions-cell";
 
-        const deleteBtn = document.createElement("button");
-        const editBtn = document.createElement("button");
+    const actions = document.createElement("div");
+    actions.className = "actions";
 
-        deleteBtn.className = "button button-primary";
-        editBtn.className = "button button-secondary";
+    const trigger = document.createElement("button");
+    trigger.className = "actions-trigger";
+    trigger.innerHTML = `<span class="material-symbols-outlined">more_vert</span>`;
 
-        deleteBtn.textContent = "Slet";
-        editBtn.textContent = "Rediger";
+    const menu = document.createElement("div");
+    menu.className = "actions-menu";
 
-        deleteBtn.onclick = () => deleteTask(task.ID);
-        editBtn.onclick = () => startEdit(task.ID);
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Rediger";
+    editBtn.onclick = () => startEdit(task.ID);
 
-        actionTd.appendChild(editBtn);
-        actionTd.appendChild(deleteBtn);
-        tr.appendChild(actionTd);
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Slet";
+    deleteBtn.className = "danger";
+    deleteBtn.onclick = () => deleteTask(task.ID);
+    menu.appendChild(editBtn);
 
-        tbody.appendChild(tr);
-        });
+    // separator
+    const separator = document.createElement("span");
+    separator.className = "actions-separator";
+
+
+    menu.appendChild(editBtn);
+    menu.appendChild(separator);    
+    menu.appendChild(deleteBtn);
+
+    trigger.onclick = (e) => {
+      e.stopPropagation();
+      toggleActions(actions);
+    };
+
+    actions.appendChild(trigger);
+    actions.appendChild(menu);
+    actionTd.appendChild(actions);
+    tr.appendChild(actionTd);
+
+    tbody.appendChild(tr);
+  });
 }
+
+function toggleActions(actionsEl) {
+  // Luk alle andre
+  document.querySelectorAll(".actions.open").forEach(el => {
+    if (el !== actionsEl) el.classList.remove("open");
+  });
+
+  actionsEl.classList.toggle("open");
+}
+
+// Luk menu ved klik udenfor
+document.addEventListener("click", () => {
+  document.querySelectorAll(".actions.open").forEach(el => {
+    el.classList.remove("open");
+  });
+});
+
 
 // søgefunktion
 function searchTasks() {
@@ -303,7 +345,7 @@ function clearForm() {
     document.getElementById("activated").value = "false";
     document.getElementById("completed").value = "false";
     document.getElementById("difficulty").value = "";
-
+//måske luk her også modal
 }
 
 // addEventListeners
