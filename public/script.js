@@ -1,51 +1,208 @@
-const API_URL = "https://gruppe2-opgaver.onrender.com";
+document.addEventListener("DOMContentLoaded", function() {
+    DKFDS.init();
+    loadTasks();
+});
+
+const API_URL = "https://gruppe2-opgaver.onrender.com/opgaver";
 
 let editMode = false;
 let editID = null;
+let allTasks = [];
+let currentPage = 1;
+let rowsPerPage = 10;
+let filteredTasks = [];
+let sortColumn = null;
+let sortDirection = "asc";
 
 // Hent alle opgaver
 async function loadTasks() {
-    const res = await fetch(`${API_URL}/opgaver`);
-    const tasks = await res.json();
+   const res = await fetch(API_URL);
+    allTasks = await res.json();
+    filteredTasks = allTasks;
+    currentPage = 1;
+    renderPaginatedTasks();
+}
 
-    const list = document.getElementById("task-list");
-    list.innerHTML = "";
+// Opret alle opgaver
+function renderTasks(tasks) {
+  const tbody = document.querySelector("#task-table tbody");
+  tbody.innerHTML = "";
 
-    tasks.forEach(task => {
-        const div = document.createElement("div");
-        div.className = "task";
+  tasks.forEach(task => {
+    const tr = document.createElement("tr");
 
-        let html = `
-            <h3>${task.Title}</h3>
-            <p>${task.Description}</p>
-            <ul>
-        `;
+    const columns = [
+      { label: "ID", value: task.ID },
+      { label: "Title", value: task.Title },
+      { label: "Type", value: task.Type },
+      { label: "Location", value: task.Location },
+      { label: "Options", value: Array.isArray(task.Options) ? task.Options.join(", ") : task.Options },
+      { label: "Latitude", value: task.Latitude },
+      { label: "Longitude", value: task.Longitude }
+    ];
 
-        for (const key in task) {
-            let value = task[key];
+    columns.forEach(col => {
+      const td = document.createElement("td");
+      td.setAttribute("data-title", col.label);
+      td.textContent = col.value;
+      tr.appendChild(td);
+    });
 
-            if (Array.isArray(value)) {
-                value = value.join(", ");
-            }
+    // === ACTIONS (3 DOT MENU) ===
+    const actionTd = document.createElement("td");
+    actionTd.className = "actions-cell";
 
-            html += `<li><strong>${key}:</strong> ${value}</li>`;
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const trigger = document.createElement("button");
+    trigger.className = "actions-trigger";
+    trigger.innerHTML = `<span class="material-symbols-outlined">more_vert</span>`;
+
+    const menu = document.createElement("div");
+    menu.className = "actions-menu";
+
+    const editBtn = document.createElement("button");
+    editBtn.textContent = "Rediger";
+    editBtn.onclick = () => startEdit(task.ID);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Slet";
+    deleteBtn.className = "danger";
+    deleteBtn.onclick = () => deleteTask(task.ID);
+    menu.appendChild(editBtn);
+
+    // separator
+    const separator = document.createElement("span");
+    separator.className = "actions-separator";
+
+
+    menu.appendChild(editBtn);
+    menu.appendChild(separator);    
+    menu.appendChild(deleteBtn);
+
+    trigger.onclick = (e) => {
+      e.stopPropagation();
+      toggleActions(actions);
+    };
+
+    actions.appendChild(trigger);
+    actions.appendChild(menu);
+    actionTd.appendChild(actions);
+    tr.appendChild(actionTd);
+
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleActions(actionsEl) {
+  // Luk alle andre
+  document.querySelectorAll(".actions.open").forEach(el => {
+    if (el !== actionsEl) el.classList.remove("open");
+  });
+
+  actionsEl.classList.toggle("open");
+}
+
+// Luk menu ved klik udenfor
+document.addEventListener("click", () => {
+  document.querySelectorAll(".actions.open").forEach(el => {
+    el.classList.remove("open");
+  });
+});
+
+
+// søgefunktion
+function searchTasks() {
+    const searchValue = document.getElementById("search-input").value.toLowerCase();
+
+    filteredTasks = allTasks.filter(task => 
+        task.Title.toLowerCase().includes(searchValue) ||
+        task.Type.toLowerCase().includes(searchValue) ||
+        task.Location.toLowerCase().includes(searchValue)
+    );
+
+    currentPage = 1;
+    renderPaginatedTasks();
+}
+
+// pagination
+function renderPaginatedTasks() {
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    const paginatedTasks = filteredTasks.slice(start, end);
+
+    renderTasks(paginatedTasks);
+    updatePaginationInfo();
+}
+
+// opdater pagination info på frontenden
+function updatePaginationInfo() {
+    const total = filteredTasks.length;
+    const start = total === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+    const end = Math.min(start + rowsPerPage - 1, total);
+
+    document.querySelector(".displayed-rows").textContent = `${start}-${end}`;
+    document.querySelector(".total-rows").textContent = total;
+    document.getElementById("current-page").textContent = `Side ${currentPage}`;
+}
+
+// sorter kolonner  i tabel
+function sortTasks(column) {
+    if (sortColumn === column) {
+        sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    } else {
+        sortColumn = column;
+        sortDirection = "asc";
+    }
+
+    filteredTasks.sort((a, b) => {
+        let valueA = a[column];
+        let valueB = b[column];
+
+        if (column === "ID") {
+            return sortDirection === "asc"
+                ? valueA - valueB
+                : valueB - valueA;
         }
 
-        html += `
-            </ul>
-            <button onclick="startEdit(${task.ID})">Rediger</button>
-            <button onclick="deleteTask(${task.ID})" style="margin-left:10px;">Slet</button>
-        `;
+        valueA = valueA.toLowerCase();
+        valueB = valueB.toLowerCase();
 
-        div.innerHTML = html;
-        list.appendChild(div);
+        if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+        if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
     });
+
+    currentPage = 1;
+    renderPaginatedTasks();
+    updateSortIcons();
+}
+
+// opdater sorter ikon 
+function updateSortIcons() {
+    document.querySelectorAll("th button").forEach(btn => {
+        const span = btn.querySelector("span");
+        if (span) {
+            span.textContent = "unfold_more";
+        }
+    });
+
+    const activeBtn = document.querySelector(`[data-sort="${sortColumn}"]`);
+    if (!activeBtn) return;
+
+    const activeSpan = activeBtn.querySelector("span");
+    if (!activeSpan) return;
+
+    activeSpan.textContent =
+        sortDirection === "asc" ? "keyboard_arrow_up" : "keyboard_arrow_down";
 }
 
 // Opret opgave
 async function createTask() {
     const task = getFormData();
-    await fetch(`${API_URL}/opgaver`, {
+    await fetch(`${API_URL}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(task)
@@ -55,17 +212,42 @@ async function createTask() {
     loadTasks();
 }
 
-// DELETE opgave
-async function deleteTask(id) {
-    if (!confirm("Er du sikker på, at du vil slette denne opgave?")) return;
+// åben modal
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.add("fds-modal--open");
+    modal.setAttribute("aria-hidden", "false");
 
-    await fetch(`${API_URL}/opgaver/${id}`, { method: "DELETE" });
-    loadTasks();
+     document.body.classList.add("modal-open");
 }
 
-// Start redigering af opgave
+// luk modal
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.remove("fds-modal--open");
+    modal.setAttribute("aria-hidden", "true");
+
+    document.body.classList.remove("modal-open");
+}
+
+// modal specifikt til opret opgave
+function openCreateModal() {
+    clearForm();
+
+    document.getElementById("modal-example-heading").textContent = "Opret ny opgave";
+
+    document.querySelector('button[onclick="createTask()"]').style.display = "block";
+    document.getElementById("updateBtn").style.display = "none";
+
+
+    const modal = document.getElementById("open");
+    modal.classList.add("fds-modal--open");
+    modal.setAttribute("aria-hidden", "false");
+}
+
+// rediger opgave
 async function startEdit(id) {
-    const res = await fetch(`${API_URL}/opgaver/${id}`);
+    const res = await fetch(`${API_URL}/${id}`);
     const task = await res.json();
 
     // Udfyld formular
@@ -82,19 +264,33 @@ async function startEdit(id) {
     document.getElementById("completed").value = task.Completed ? "true" : "false";
     document.getElementById("difficulty").value = task.Difficulty;
 
-
     // Skift UI til rediger-tilstand
     editMode = true;
     editID = id;
+
+    // Sæt overskrift
+    document.getElementById("modal-example-heading").textContent = "Rediger opgave";
+
+    // Vis/skjul knapper
     document.querySelector('button[onclick="createTask()"]').style.display = "none";
     document.getElementById("updateBtn").style.display = "block";
+
+   openModal("open");
+}
+
+// DELETE opgave
+async function deleteTask(id) {
+    if (!confirm("Er du sikker på, at du vil slette denne opgave?")) return;
+
+    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    loadTasks();
 }
 
 // Gem ændringer
 async function updateTask() {
     const updated = getFormData();
 
-    await fetch(`${API_URL}/opgaver/${editID}`, {
+    await fetch(`${API_URL}/${editID}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated)
@@ -102,6 +298,11 @@ async function updateTask() {
 
     clearForm();
     loadTasks();
+
+    // Luk modal
+    const modal = document.getElementById("open");
+    modal.setAttribute("aria-hidden", "true");
+    modal.classList.remove("fds-modal--open");
 
     // Gå tilbage til opret-tilstand
     editMode = false;
@@ -144,7 +345,52 @@ function clearForm() {
     document.getElementById("activated").value = "false";
     document.getElementById("completed").value = "false";
     document.getElementById("difficulty").value = "";
-
+//måske luk her også modal
 }
 
-window.onload = loadTasks;
+// addEventListeners
+document.querySelectorAll("[data-modal-close]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const modal = btn.closest(".fds-modal");
+        modal.setAttribute("aria-hidden", "true");
+        modal.classList.remove("fds-modal--open");
+    });
+});
+
+// klik på søgeknap
+document.getElementById("search-btn").addEventListener("click", searchTasks)
+
+// forrige side pagination knap
+document.getElementById("prev-page").addEventListener("click", () => {
+    if (currentPage > 1) {
+        currentPage--;
+        renderPaginatedTasks();
+    }
+});
+
+// næste side pagination knap
+document.getElementById("next-page").addEventListener("click", () => {
+    const maxPages = Math.ceil(filteredTasks.length / rowsPerPage);
+
+    if (currentPage < maxPages) {
+        currentPage++;
+        renderPaginatedTasks();
+    }
+});
+
+// ændring af hvor mange opgaver man vil se på hver side
+document.getElementById("pagination-pages").addEventListener("change", (e) => {
+    rowsPerPage = e.target.value === "all"
+        ? Infinity
+        : Number(e.target.value);
+
+    currentPage = 1;
+    renderPaginatedTasks();
+});
+
+document.querySelectorAll("th button[data-sort]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        sortTasks(btn.dataset.sort);
+    });
+});
+
