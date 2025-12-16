@@ -433,8 +433,12 @@ document.getElementById("next-page").addEventListener("click", () => {
 });
 
 document.getElementById("pagination-pages").addEventListener("change", (e) => {
-    rowsPerPage = e.target.value === "all" ? Infinity : Number(e.target.value);
-    currentPage = Math.min(currentPage, Math.ceil(filteredTasks.length / rowsPerPage) || 1);
+    if (e.target.value === "all") {
+        rowsPerPage = filteredTasks.length;
+        currentPage = 1;
+    } else {
+        rowsPerPage = Number(e.target.value);
+    }
     renderPaginatedTasks();
 });
 
