@@ -1,5 +1,3 @@
-// server.js — Node HTTP server uden Express
-
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
@@ -16,9 +14,7 @@ const {
     exportAllTasks
 } = require("./opgaveService");
 
-// ------------------------------------------------------
-// Helper functions
-// ------------------------------------------------------
+// hjælper funktioner
 
 function sendJSON(res, data) {
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -36,9 +32,7 @@ function setHeaders(res) {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-// ------------------------------------------------------
-// Server
-// ------------------------------------------------------
+// server
 
 const server = http.createServer((req, res) => {
     setHeaders(res);
@@ -53,9 +47,7 @@ const server = http.createServer((req, res) => {
         return res.end();
     }
 
-    // ------------------------------------------------------
-    // STATIC FILE ROUTING FOR /staticfiles/xxxx.json
-    // ------------------------------------------------------
+//  static file routing
     if (method === "GET" && pathName.startsWith("/staticfiles/")) {
 
         const fileName = pathName.replace("/staticfiles/", "");
@@ -64,100 +56,132 @@ const server = http.createServer((req, res) => {
         console.log("Henter statisk fil:", filePath);
 
         if (fs.existsSync(filePath)) {
-            const file = fs.readFileSync(filePath);
-            res.writeHead(200, {
-                "Content-Type": "application/json",
-                "Content-Disposition": `attachment; filename="${fileName}"`
-            });
-            return res.end(file);
-        }
+    try {
+        const file = fs.readFileSync(filePath);
+        res.writeHead(200, {
+            "Content-Type": "application/json",
+            "Content-Disposition": `attachment; filename="${fileName}"`
+        });
+        return res.end(file);
+    } catch (error) {
+        console.error("Fejl ved læsning af fil:", error);
+        res.writeHead(500);
+        return res.end("Internal Server Error");
+    }
+}
 
         return notFound(res);
     }
 
-    // ------------------------------------------------------
     // GET /opgaver
-    // ------------------------------------------------------
     if (method === "GET" && pathName === "/opgaver") {
-        return sendJSON(res, getAllTasks());
+    try {
+        const tasks = getAllTasks();
+        return sendJSON(res, tasks);
+    } catch (error) {
+        console.error("Fejl ved hentning af alle opgaver:", error);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Internal Server Error" }));
     }
+}
 
-    // ------------------------------------------------------
-    // GET /opgaver/:id
-    // ------------------------------------------------------
+    // GET /opgaver/id
     const taskMatch = pathName.match(/^\/opgaver\/(\d+)$/);
-    if (method === "GET" && taskMatch) {
-        const id = Number(taskMatch[1]);
+if (method === "GET" && taskMatch) {
+    const id = Number(taskMatch[1]);
+    try {
         const task = getTask(id);
-
         return task ? sendJSON(res, task) : notFound(res);
+    } catch (error) {
+        console.error(`Fejl ved hentning af opgave ${id}:`, error);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Internal Server Error" }));
     }
+}
 
-    // ------------------------------------------------------
-    // GET /export  (shared JSON format)
-    // ------------------------------------------------------
-    if (method === "GET" && pathName === "/export") {
-        return sendJSON(res, exportAllTasks());
+     // GET /export
+   if (method === "GET" && pathName === "/export") {
+    try {
+        const data = exportAllTasks();
+        return sendJSON(res, data);
+    } catch (error) {
+        console.error("Fejl ved eksport af alle opgaver:", error);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Internal Server Error" }));
     }
+}
 
-    // ------------------------------------------------------
-    // GET /export/:id
-    // ------------------------------------------------------
+     // GET /export/id
     const exportMatch = pathName.match(/^\/export\/(\d+)$/);
-    if (method === "GET" && exportMatch) {
-        const id = Number(exportMatch[1]);
+if (method === "GET" && exportMatch) {
+    const id = Number(exportMatch[1]);
+    try {
         const data = exportTask(id);
-
         return data ? sendJSON(res, data) : notFound(res);
+    } catch (error) {
+        console.error(`Fejl ved eksport af opgave ${id}:`, error);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Internal Server Error" }));
     }
+}
 
-    // ------------------------------------------------------
-    // POST /opgaver
-    // ------------------------------------------------------
+//    POST /opgaver
     if (method === "POST" && pathName === "/opgaver") {
-        let body = "";
-        req.on("data", chunk => (body += chunk));
-        req.on("end", () => {
+    let body = "";
+    req.on("data", chunk => (body += chunk));
+    req.on("end", () => {
+        try {
             const newTask = createTask(JSON.parse(body));
             sendJSON(res, newTask);
-        });
-        return;
-    }
+        } catch (error) {
+            console.error("Fejl ved oprettelse af opgave:", error);
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Ugyldig JSON" }));
+        }
+    });
+    return;
+}
 
-    // ------------------------------------------------------
-    // PUT /opgaver/:id
-    // ------------------------------------------------------
+    //    POST /opgaver/id
     if (method === "PUT" && taskMatch) {
         let body = "";
         req.on("data", chunk => (body += chunk));
         req.on("end", () => {
+            try{
             const updated = updateTask(Number(taskMatch[1]), JSON.parse(body));
             return updated ? sendJSON(res, updated) : notFound(res);
+            } catch(error){
+                console.error("Fejl ved oprettelse af opgave:", error);
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Ugyldig JSON" }));
+            }
+            
         });
         return;
     }
 
-    // ------------------------------------------------------
-    // DELETE /opgaver/:id
-    // ------------------------------------------------------
+    // DELETE /opgaver/id
+
     if (method === "DELETE" && taskMatch) {
         const ok = deleteTask(Number(taskMatch[1]));
         if (!ok) return notFound(res);
-
-        res.writeHead(204);
+    try {
+        console.log(`Task ${id} slettet succesfuldt`);
+        res.writeHead(204); // No Content
         return res.end();
+    } catch (error) {
+        console.error(`Fejl ved sletning af opgave ${id}:`, error);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Internal Server Error" }));
     }
+}
 
-    // ------------------------------------------------------
-    // Fallback
-    // ------------------------------------------------------
+    // fallback
     notFound(res);
 });
 
-// ------------------------------------------------------
-// Start server
-// ------------------------------------------------------
 
+// start server
 const PORT = process.env.PORT || 3000;
 writeExportFile();
 server.listen(PORT, () => console.log("Server running on port " + PORT));

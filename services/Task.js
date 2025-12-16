@@ -19,7 +19,7 @@ class Task {
         this.Description = Description;
         this.Type = Type;
         this.Location = Location;
-        this.Radius = Radius !== "" ? Number(Radius) : null;
+        this.Radius = Radius !== "" && !isNaN(Number(Radius)) ? Number(Radius) : null;
         this.Options = typeof Options === "string"
             ? Options.split(";").map(o => o.trim()).filter(o => o.length > 0)
             : [];
@@ -27,13 +27,14 @@ class Task {
         this.Activated = Activated === true || Activated === "true";
         this.Completed = Completed === true || Completed === "true";
         this.Difficulty = String(Difficulty || "");
-        this.Latitude = Latitude !== "" ? Number(Latitude) : null;
-        this.Longitude = Longitude !== "" ? Number(Longitude) : null;
+        this.Latitude = Latitude !== "" && !isNaN(Number(Latitude)) ? Number(Latitude) : null;
+        this.Longitude = Longitude !== "" && !isNaN(Number(Longitude)) ? Number(Longitude) : null;
     }
 
     // metode der bruges når vi eksporterer til Team 2 og 3
     toSharedJSON() {
-        return {
+        try{
+            return {
             id: this.ID,
             title: this.Title,
             description: this.Description,
@@ -48,6 +49,10 @@ class Task {
             latitude: this.Latitude,
             longitude: this.Longitude
         };
+
+        } catch(error){
+            console.error("Fejl ved eksport af Task", error.message)
+        }
     }
 
 }
