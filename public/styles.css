@@ -149,7 +149,7 @@ th button{
     align-items: center;
 }
 
-/* Actions (3-dot menu) */
+/*handlinger */
 .actions {
   position: relative;
   display: inline-block;
@@ -204,9 +204,13 @@ th button{
   margin: 0px 0;
 }
 
+/* responsiv tablet/desktop */
 
+@media (min-width: 768px) {
 
-@media (max-width: 768px) {
+  header .logo span{
+    font-size: 2rem;
+  }
 
   .fds-modal .modal-content {
     max-width: 100%;
@@ -246,10 +250,8 @@ th button{
     font-size: 20px !important;     
   }
 
-}
-
-@media (min-width:1024px){
-    body{
+  body{
        padding-bottom: 100px;
     }
+
 }

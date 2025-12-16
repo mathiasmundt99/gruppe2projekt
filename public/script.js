@@ -48,7 +48,7 @@ function renderTasks(tasks) {
       tr.appendChild(td);
     });
 
-    // === ACTIONS (3 DOT MENU) ===
+    // handlingsmenu
     const actionTd = document.createElement("td");
     actionTd.className = "actions-cell";
 
