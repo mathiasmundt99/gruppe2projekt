@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Opgave Manager</title>
     <!-- Egne styles og javascript filer -->
-    <script defer src="script.js"></script>
+    <script defer src="./script.js"></script>
     <link rel="stylesheet" href="styles.css" />
     <!-- google material icons -->
     <link
@@ -78,83 +78,73 @@
 
         <div class="modal-body grid">
           <div class="field full">
-            <label for="title">Title</label>
-            <input
-              id="title"
-              type="text"
-              aria-describedby="title-error"
-              placeholder="Eksempel: velkomst" />
-            <div
-              id="title-error"
-              class="form-error"
-              role="alert"
-              aria-live="polite"
-              style="display: none">
-              <span class="material-symbols-outlined">error</span>
-              Udfyld venligst titel
-            </div>
+            <label for="title">Titel</label>
+            <input id="title" type="text" placeholder="Eksempel: Velkomst" />
           </div>
 
           <div class="field full">
-            <label for="description">Description</label>
+            <label for="description">Beskrivelse</label>
             <textarea
               id="description"
               rows="4"
-              aria-describedby="description-error"
               placeholder="Eksempel: Start ved hovedindgangen til Nymindegablejren."></textarea>
-            <div
-              id="description-error"
-              class="form-error"
-              role="alert"
-              aria-live="polite"
-              style="display: none">
-              <span class="material-symbols-outlined">error</span>
-              Udfyld venligst beskrivelse
-            </div>
           </div>
 
           <div class="field">
             <label for="type">Type</label>
-            <input id="type" type="text" />
+            <input id="type" type="text" placeholder="Land / Sø" />
           </div>
 
           <div class="field">
-            <label for="location">Location</label>
-            <input id="location" type="text" />
+            <label for="location">Lokation</label>
+            <input
+              id="location"
+              type="text"
+              placeholder="Eksempel: Nymindegab, Hovedport" />
           </div>
 
           <div class="field">
             <label for="radius">Radius</label>
-            <input id="radius" type="number" />
+            <input id="radius" type="number" placeholder="Eksempel: 22" />
           </div>
 
           <div class="field">
-            <label for="difficulty">Difficulty</label>
-            <input id="difficulty" />
+            <label for="difficulty">Sværhedsgrad</label>
+            <input id="difficulty" placeholder="Let / Mellem / Svær" />
           </div>
 
           <div class="field">
             <label for="latitude">Latitude</label>
-            <input id="latitude" type="number" step="any" />
+            <input
+              id="latitude"
+              type="number"
+              step="any"
+              placeholder="Eksempel: 8,2501" />
           </div>
 
           <div class="field">
             <label for="longitude">Longitude</label>
-            <input id="longitude" type="number" step="any" />
+            <input
+              id="longitude"
+              type="number"
+              step="any"
+              placeholder="Eksempel: 55,7398" />
           </div>
 
           <div class="field">
             <label for="options">Handlinger (adskilt af ; semikolon)</label>
-            <input id="options" />
+            <input
+              id="options"
+              placeholder="Eksempel: Start;Læs historie først" />
           </div>
 
           <div class="field">
-            <label for="activationCondition">Activation Condition</label>
-            <input id="activationCondition" />
+            <label for="activationCondition">Aktiveringsbetingelse</label>
+            <input id="activationCondition" placeholder="Eksempel:Lokalitet " />
           </div>
 
           <div class="field">
-            <label for="activated">Activated</label>
+            <label for="activated">Aktiveret</label>
             <select id="activated">
               <option value="false">False</option>
               <option value="true">True</option>
@@ -162,7 +152,7 @@
           </div>
 
           <div class="field">
-            <label for="completed">Completed</label>
+            <label for="completed">Færdiggjort</label>
             <select id="completed">
               <option value="false">False</option>
               <option value="true">True</option>
@@ -174,10 +164,7 @@
           <button class="button button-primary" onclick="clearForm()">
             Ryd formular
           </button>
-          <button
-            id="create-btn"
-            class="button button-secondary"
-            onclick="createTask()">
+          <button class="button button-secondary" onclick="createTask()">
             OPRET OPGAVE
           </button>
           <button

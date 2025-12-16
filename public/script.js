@@ -85,7 +85,7 @@ editBtn.onclick = () => startEdit(task.ID);
 const deleteBtn = document.createElement("button");
 deleteBtn.innerHTML = `<span class="material-symbols-outlined">
 delete
-</span> Rediger`
+</span> Slet`
 deleteBtn.className = "danger";
 deleteBtn.onclick = () => deleteTask(task.ID);
 
@@ -234,34 +234,10 @@ function updateSortIcons() {
         sortDirection === "asc" ? "keyboard_arrow_up" : "keyboard_arrow_down";
 }
 
-// validateform
-function validateForm() {
-  let valid = true;
-
-  const title = document.getElementById('title');
-  const titleError = document.getElementById('title-error');
-  if (!title.value.trim()) {
-    titleError.style.display = 'block';
-    valid = false;
-  } else {
-    titleError.style.display = 'none';
-  }
-
-  const description = document.getElementById('description');
-  const descriptionError = document.getElementById('description-error');
-  if (!description.value.trim()) {
-    descriptionError.style.display = 'block';
-    valid = false;
-  } else {
-    descriptionError.style.display = 'none';
-  }
-
-  return valid;
-}
-
 // Opret opgave
 async function createTask() {
-    if (!validateForm()) return;
+    if (!validateForm()) return; // Stop hvis form er ugyldig
+
     const task = getFormData();
     await fetch(`${API_URL}`, {
         method: "POST",
@@ -271,6 +247,7 @@ async function createTask() {
 
     clearForm();
     loadTasks();
+    closeModal("open"); // Luk modal efter oprettelse
 }
 
 // åben modal
@@ -291,20 +268,19 @@ function closeModal(modalId) {
     modal.setAttribute("aria-hidden", "true");
 
     document.body.classList.remove("modal-open");
-
-    // skjul overlay
     document.getElementById("modal-overlay").classList.remove("active");
+
+    clearValidationErrors(); // <-- tilføj her også, så det altid ryddes
 }
 
 // modal specifikt til opret opgave
 function openCreateModal() {
     clearForm();
+    clearValidationErrors(); // <-- tilføj her
 
     document.getElementById("modal-example-heading").textContent = "Opret ny opgave";
-
     document.querySelector('button[onclick="createTask()"]').style.display = "block";
     document.getElementById("updateBtn").style.display = "none";
-
 
     openModal("open"); 
 }
@@ -352,6 +328,8 @@ async function deleteTask(id) {
 
 // Gem ændringer
 async function updateTask() {
+    if (!validateForm()) return; // Stop hvis form er ugyldig
+
     const updated = getFormData();
 
     await fetch(`${API_URL}/${editID}`, {
@@ -362,15 +340,7 @@ async function updateTask() {
 
     clearForm();
     loadTasks();
-
-    // Luk modal og fjern overlay
     closeModal("open");
-
-    // Gå tilbage til opret-tilstand
-    editMode = false;
-    editID = null;
-    document.querySelector('button[onclick="createTask()"]').style.display = "block";
-    document.getElementById("updateBtn").style.display = "none";
 }
 
 // Hent input fra formularen
@@ -409,6 +379,53 @@ function clearForm() {
     document.getElementById("difficulty").value = "";
 //måske luk her også modal
 }
+
+function validateForm() {
+    // Liste over felter der skal valideres
+    const requiredFields = [
+        "title", "description", "type", "location", 
+        "radius", "latitude", "longitude", "options", 
+        "activationCondition", "difficulty"
+    ];
+
+    let isValid = true;
+
+    requiredFields.forEach(id => {
+        const input = document.getElementById(id);
+
+        if (!input.value.trim()) {
+            isValid = false;
+
+            // Tilføj fejlklasse (kan styles i CSS)
+            input.classList.add("error");
+
+            // Hvis du vil vise en tooltip eller besked
+            if (!input.nextElementSibling || !input.nextElementSibling.classList.contains("error-message")) {
+                const errorMessage = document.createElement("span");
+                errorMessage.className = "error-message";
+                errorMessage.textContent = "Dette felt skal udfyldes";
+                input.parentNode.appendChild(errorMessage);
+            }
+        } else {
+            // Fjern fejl hvis feltet nu er udfyldt
+            input.classList.remove("error");
+            if (input.nextElementSibling && input.nextElementSibling.classList.contains("error-message")) {
+                input.nextElementSibling.remove();
+            }
+        }
+    });
+
+    return isValid;
+}
+
+function clearValidationErrors() {
+    // Fjern alle fejlklasser
+    document.querySelectorAll(".error").forEach(el => el.classList.remove("error"));
+
+    // Fjern alle fejlmeddelelser
+    document.querySelectorAll(".error-message").forEach(el => el.remove());
+}
+
 
 
 // addEventListeners

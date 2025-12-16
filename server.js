@@ -1,5 +1,3 @@
-// server.js — Node HTTP server uden Express
-
 const http = require("http");
 const url = require("url");
 const fs = require("fs");
@@ -16,9 +14,7 @@ const {
     exportAllTasks
 } = require("./opgaveService");
 
-// ------------------------------------------------------
-// Helper functions
-// ------------------------------------------------------
+// hjælper funktioner
 
 function sendJSON(res, data) {
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -36,9 +32,7 @@ function setHeaders(res) {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-// ------------------------------------------------------
-// Server
-// ------------------------------------------------------
+// server
 
 const server = http.createServer((req, res) => {
     setHeaders(res);
@@ -53,9 +47,7 @@ const server = http.createServer((req, res) => {
         return res.end();
     }
 
-    // ------------------------------------------------------
-    // STATIC FILE ROUTING FOR /staticfiles/xxxx.json
-    // ------------------------------------------------------
+//  static file routing
     if (method === "GET" && pathName.startsWith("/staticfiles/")) {
 
         const fileName = pathName.replace("/staticfiles/", "");
@@ -75,16 +67,12 @@ const server = http.createServer((req, res) => {
         return notFound(res);
     }
 
-    // ------------------------------------------------------
     // GET /opgaver
-    // ------------------------------------------------------
     if (method === "GET" && pathName === "/opgaver") {
         return sendJSON(res, getAllTasks());
     }
 
-    // ------------------------------------------------------
-    // GET /opgaver/:id
-    // ------------------------------------------------------
+    // GET /opgaver/id
     const taskMatch = pathName.match(/^\/opgaver\/(\d+)$/);
     if (method === "GET" && taskMatch) {
         const id = Number(taskMatch[1]);
@@ -93,16 +81,12 @@ const server = http.createServer((req, res) => {
         return task ? sendJSON(res, task) : notFound(res);
     }
 
-    // ------------------------------------------------------
-    // GET /export  (shared JSON format)
-    // ------------------------------------------------------
+     // GET /export
     if (method === "GET" && pathName === "/export") {
         return sendJSON(res, exportAllTasks());
     }
 
-    // ------------------------------------------------------
-    // GET /export/:id
-    // ------------------------------------------------------
+     // GET /export/id
     const exportMatch = pathName.match(/^\/export\/(\d+)$/);
     if (method === "GET" && exportMatch) {
         const id = Number(exportMatch[1]);
@@ -111,9 +95,7 @@ const server = http.createServer((req, res) => {
         return data ? sendJSON(res, data) : notFound(res);
     }
 
-    // ------------------------------------------------------
-    // POST /opgaver
-    // ------------------------------------------------------
+//    POST /opgaver
     if (method === "POST" && pathName === "/opgaver") {
         let body = "";
         req.on("data", chunk => (body += chunk));
@@ -124,9 +106,7 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    // ------------------------------------------------------
-    // PUT /opgaver/:id
-    // ------------------------------------------------------
+    //    POST /opgaver/id
     if (method === "PUT" && taskMatch) {
         let body = "";
         req.on("data", chunk => (body += chunk));
@@ -137,9 +117,7 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    // ------------------------------------------------------
-    // DELETE /opgaver/:id
-    // ------------------------------------------------------
+    // DELETE /opgaver/id
     if (method === "DELETE" && taskMatch) {
         const ok = deleteTask(Number(taskMatch[1]));
         if (!ok) return notFound(res);
@@ -148,16 +126,12 @@ const server = http.createServer((req, res) => {
         return res.end();
     }
 
-    // ------------------------------------------------------
-    // Fallback
-    // ------------------------------------------------------
+    // fallback
     notFound(res);
 });
 
-// ------------------------------------------------------
-// Start server
-// ------------------------------------------------------
 
+// start server
 const PORT = process.env.PORT || 3000;
 writeExportFile();
 server.listen(PORT, () => console.log("Server running on port " + PORT));

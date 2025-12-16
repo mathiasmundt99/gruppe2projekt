@@ -260,7 +260,7 @@ th button{
   color: var(--primary-red);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: left;
   gap: 1rem;
 }
 
@@ -292,6 +292,18 @@ th button{
   border: 1px solid var(--secondary-grey) ;
   font-size: 12px;
   color:var(--black) ;
+}
+
+/* error */
+.error {
+    border: 1px solid red;
+}
+
+.error-message {
+    color: red;
+    font-size: 1rem;
+    margin-top: 2px;
+    display: block;
 }
 
 /* media queries */
