@@ -42,56 +42,91 @@ function renderTasks(tasks) {
     ];
 
     columns.forEach(col => {
-      const td = document.createElement("td");
-      td.setAttribute("data-title", col.label);
-      td.textContent = col.value;
-      tr.appendChild(td);
+  const td = document.createElement("td");
+  td.setAttribute("data-title", col.label);
+
+  if (col.label === "Options" && Array.isArray(task.Options)) {
+    td.innerHTML = "";
+    task.Options.forEach(option => {
+      const span = document.createElement("span");
+      span.className = "task-option"; 
+      span.textContent = option;
+      td.appendChild(span);
     });
+  } else {
+    td.textContent = col.value;
+  }
 
-    // handlingsmenu
+  tr.appendChild(td);
+});
+
+    // handlinger
     const actionTd = document.createElement("td");
-    actionTd.className = "actions-cell";
+actionTd.className = "actions-cell";
 
-    const actions = document.createElement("div");
-    actions.className = "actions";
+// løsning til desktop
+const actions = document.createElement("div");
+actions.className = "actions desktop-only";
 
-    const trigger = document.createElement("button");
-    trigger.className = "actions-trigger";
-    trigger.innerHTML = `<span class="material-symbols-outlined">more_vert</span>`;
+const trigger = document.createElement("button");
+trigger.className = "actions-trigger";
+trigger.innerHTML = `<span class="material-symbols-outlined">more_vert</span>`;
 
-    const menu = document.createElement("div");
-    menu.className = "actions-menu";
+const menu = document.createElement("div");
+menu.className = "actions-menu";
 
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "Rediger";
-    editBtn.onclick = () => startEdit(task.ID);
+const editBtn = document.createElement("button");
+editBtn.className = "editBtn";
+editBtn.innerHTML = `<span class="material-symbols-outlined">
+edit_square
+</span> Rediger`
+editBtn.onclick = () => startEdit(task.ID);
 
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Slet";
-    deleteBtn.className = "danger";
-    deleteBtn.onclick = () => deleteTask(task.ID);
-    menu.appendChild(editBtn);
+const deleteBtn = document.createElement("button");
+deleteBtn.innerHTML = `<span class="material-symbols-outlined">
+delete
+</span> Rediger`
+deleteBtn.className = "danger";
+deleteBtn.onclick = () => deleteTask(task.ID);
 
-    // separator
-    const separator = document.createElement("span");
-    separator.className = "actions-separator";
+const separator = document.createElement("span");
+separator.className = "actions-separator";
 
+menu.appendChild(editBtn);
+menu.appendChild(separator);
+menu.appendChild(deleteBtn);
 
-    menu.appendChild(editBtn);
-    menu.appendChild(separator);    
-    menu.appendChild(deleteBtn);
+trigger.onclick = (e) => {
+  e.stopPropagation();
+  toggleActions(actions);
+};
 
-    trigger.onclick = (e) => {
-      e.stopPropagation();
-      toggleActions(actions);
-    };
+actions.appendChild(trigger);
+actions.appendChild(menu);
 
-    actions.appendChild(trigger);
-    actions.appendChild(menu);
-    actionTd.appendChild(actions);
-    tr.appendChild(actionTd);
+/* løsning til mobil */
+const mobileActions = document.createElement("div");
+mobileActions.className = "mobile-actions mobile-only";
 
-    tbody.appendChild(tr);
+const mobileEdit = document.createElement("button");
+mobileEdit.className = "button button-primary ";
+mobileEdit.textContent = "Rediger";
+mobileEdit.onclick = () => startEdit(task.ID);
+
+const mobileDelete = document.createElement("button");
+mobileDelete.className = "button button-secondary";
+mobileDelete.textContent = "Slet";
+mobileDelete.onclick = () => deleteTask(task.ID);
+
+mobileActions.appendChild(mobileEdit);
+mobileActions.appendChild(mobileDelete);
+
+/* append det hele */
+actionTd.appendChild(actions);
+actionTd.appendChild(mobileActions);
+tr.appendChild(actionTd);
+
+ tbody.appendChild(tr);
   });
 }
 
@@ -199,8 +234,34 @@ function updateSortIcons() {
         sortDirection === "asc" ? "keyboard_arrow_up" : "keyboard_arrow_down";
 }
 
+// validateform
+function validateForm() {
+  let valid = true;
+
+  const title = document.getElementById('title');
+  const titleError = document.getElementById('title-error');
+  if (!title.value.trim()) {
+    titleError.style.display = 'block';
+    valid = false;
+  } else {
+    titleError.style.display = 'none';
+  }
+
+  const description = document.getElementById('description');
+  const descriptionError = document.getElementById('description-error');
+  if (!description.value.trim()) {
+    descriptionError.style.display = 'block';
+    valid = false;
+  } else {
+    descriptionError.style.display = 'none';
+  }
+
+  return valid;
+}
+
 // Opret opgave
 async function createTask() {
+    if (!validateForm()) return;
     const task = getFormData();
     await fetch(`${API_URL}`, {
         method: "POST",
@@ -218,16 +279,21 @@ function openModal(modalId) {
     modal.classList.add("fds-modal--open");
     modal.setAttribute("aria-hidden", "false");
 
-     document.body.classList.add("modal-open");
+    document.body.classList.add("modal-open");
+
+    // vis overlay
+    document.getElementById("modal-overlay").classList.add("active");
 }
 
-// luk modal
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     modal.classList.remove("fds-modal--open");
     modal.setAttribute("aria-hidden", "true");
 
     document.body.classList.remove("modal-open");
+
+    // skjul overlay
+    document.getElementById("modal-overlay").classList.remove("active");
 }
 
 // modal specifikt til opret opgave
@@ -240,9 +306,7 @@ function openCreateModal() {
     document.getElementById("updateBtn").style.display = "none";
 
 
-    const modal = document.getElementById("open");
-    modal.classList.add("fds-modal--open");
-    modal.setAttribute("aria-hidden", "false");
+    openModal("open"); 
 }
 
 // rediger opgave
@@ -299,10 +363,8 @@ async function updateTask() {
     clearForm();
     loadTasks();
 
-    // Luk modal
-    const modal = document.getElementById("open");
-    modal.setAttribute("aria-hidden", "true");
-    modal.classList.remove("fds-modal--open");
+    // Luk modal og fjern overlay
+    closeModal("open");
 
     // Gå tilbage til opret-tilstand
     editMode = false;
@@ -348,12 +410,12 @@ function clearForm() {
 //måske luk her også modal
 }
 
+
 // addEventListeners
 document.querySelectorAll("[data-modal-close]").forEach(btn => {
     btn.addEventListener("click", () => {
         const modal = btn.closest(".fds-modal");
-        modal.setAttribute("aria-hidden", "true");
-        modal.classList.remove("fds-modal--open");
+        closeModal(modal.id); 
     });
 });
 

@@ -21,129 +21,175 @@
         <img src="./assets/logo-red.svg" alt="Logo" />
         <span>OPGAVEDATABASE</span>
       </div>
-      <div>
+      <div class="mobile-only"></div>
+    </header>
+
+    <section class="action-bar">
       <div class="form-group search">
         <label for="input-type-text" class="sr-only">Søg efter indhold</label>
-       <input
-  class="form-input input-char-27"
-  id="search-input"
-  type="search"
-  placeholder="Søg i opgaver" />
+        <input
+          class="form-input input-char-27"
+          id="search-input"
+          type="search"
+          placeholder="Søg i opgaver" />
 
-<button class="button button-search" id="search-btn">Søg</button>
+        <button class="button button-primary" id="search-btn">
+          <span class="material-symbols-outlined"> search </span>
+          Søg
+        </button>
       </div>
-    </header>
-    <!-- modal med opret ny opgave -->
-   <div
-  class="fds-modal"
-  id="open"
-  aria-hidden="true"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="modal-example-heading">
+      <div class="desktop-only export">
+        <div>
+          <a
+            class="button-secondary button"
+            href="https://gruppe2-opgaver.onrender.com/staticfiles/opgaver.json"
+            download>
+            <span class="material-symbols-outlined"> download </span>
+            EKSPORTER LISTE
+          </a>
+        </div>
+        <div>
+          <button class="button button-primary" onclick="openCreateModal()">
+            <span class="material-symbols-outlined"> add </span>
+            NY OPGAVE
+          </button>
+        </div>
+      </div>
+    </section>
 
-  <div class="modal-content">
+    <!-- modal med opret ny opgave / rediger opgave -->
+    <div
+      class="fds-modal"
+      id="open"
+      aria-hidden="true"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-example-heading">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modal-example-heading">
+            Opret ny opgave
+          </h2>
+          <button class="modal-close function-link" data-modal-close>
+            <span class="material-symbols-outlined">close</span>
+            Luk
+          </button>
+        </div>
 
-    <div class="modal-header">
-      <h2 class="modal-title" id="modal-example-heading">
-        Opret ny opgave
-      </h2>
-      <button class="modal-close function-link" data-modal-close>
-        <span class="material-symbols-outlined">close</span>
-        Luk
-      </button>
+        <div class="modal-body grid">
+          <div class="field full">
+            <label for="title">Title</label>
+            <input
+              id="title"
+              type="text"
+              aria-describedby="title-error"
+              placeholder="Eksempel: velkomst" />
+            <div
+              id="title-error"
+              class="form-error"
+              role="alert"
+              aria-live="polite"
+              style="display: none">
+              <span class="material-symbols-outlined">error</span>
+              Udfyld venligst titel
+            </div>
+          </div>
+
+          <div class="field full">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              rows="4"
+              aria-describedby="description-error"
+              placeholder="Eksempel: Start ved hovedindgangen til Nymindegablejren."></textarea>
+            <div
+              id="description-error"
+              class="form-error"
+              role="alert"
+              aria-live="polite"
+              style="display: none">
+              <span class="material-symbols-outlined">error</span>
+              Udfyld venligst beskrivelse
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="type">Type</label>
+            <input id="type" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="location">Location</label>
+            <input id="location" type="text" />
+          </div>
+
+          <div class="field">
+            <label for="radius">Radius</label>
+            <input id="radius" type="number" />
+          </div>
+
+          <div class="field">
+            <label for="difficulty">Difficulty</label>
+            <input id="difficulty" />
+          </div>
+
+          <div class="field">
+            <label for="latitude">Latitude</label>
+            <input id="latitude" type="number" step="any" />
+          </div>
+
+          <div class="field">
+            <label for="longitude">Longitude</label>
+            <input id="longitude" type="number" step="any" />
+          </div>
+
+          <div class="field">
+            <label for="options">Handlinger (adskilt af ; semikolon)</label>
+            <input id="options" />
+          </div>
+
+          <div class="field">
+            <label for="activationCondition">Activation Condition</label>
+            <input id="activationCondition" />
+          </div>
+
+          <div class="field">
+            <label for="activated">Activated</label>
+            <select id="activated">
+              <option value="false">False</option>
+              <option value="true">True</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="completed">Completed</label>
+            <select id="completed">
+              <option value="false">False</option>
+              <option value="true">True</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="button button-primary" onclick="clearForm()">
+            Ryd formular
+          </button>
+          <button
+            id="create-btn"
+            class="button button-secondary"
+            onclick="createTask()">
+            OPRET OPGAVE
+          </button>
+          <button
+            id="updateBtn"
+            class="button button-secondary"
+            onclick="updateTask()"
+            style="display: none">
+            Gem ændringer
+          </button>
+        </div>
+      </div>
     </div>
-
-    <div class="modal-body grid">
-
-      <div class="field full">
-        <label for="title">Title</label>
-        <input id="title" type="text" />
-      </div>
-
-      <div class="field full">
-        <label for="description">Description</label>
-        <textarea id="description" rows="4"></textarea>
-      </div>
-
-      <div class="field">
-        <label for="type">Type</label>
-        <input id="type" type="text" />
-      </div>
-
-      <div class="field">
-        <label for="location">Location</label>
-        <input id="location" type="text" />
-      </div>
-
-      <div class="field">
-        <label for="radius">Radius</label>
-        <input id="radius" type="number" />
-      </div>
-
-      <div class="field">
-        <label for="difficulty">Difficulty</label>
-        <input id="difficulty" />
-      </div>
-
-      <div class="field">
-        <label for="latitude">Latitude</label>
-        <input id="latitude" type="number" step="any" />
-      </div>
-
-      <div class="field">
-        <label for="longitude">Longitude</label>
-        <input id="longitude" type="number" step="any" />
-      </div>
-
-      <div class="field">
-        <label for="options">Handlinger (adskilt af ; semikolon)</label>
-        <input id="options" />
-      </div>
-
-      <div class="field">
-        <label for="activationCondition">Activation Condition</label>
-        <input id="activationCondition" />
-      </div>
-
-      <div class="field">
-        <label for="activated">Activated</label>
-        <select id="activated">
-          <option value="false">False</option>
-          <option value="true">True</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="completed">Completed</label>
-        <select id="completed">
-          <option value="false">False</option>
-          <option value="true">True</option>
-        </select>
-      </div>
-
-    </div>
-
-    <div class="modal-footer">
-      <button class="button button-primary" onclick="clearForm()">
-        Ryd formular
-      </button>
-      <button class="button button-secondary" onclick="createTask()">
-        OPRET OPGAVE
-      </button>
-      <button
-        id="updateBtn"
-        class="button button-secondary"
-        onclick="updateTask()"
-        style="display:none">
-        Gem ændringer
-      </button>
-    </div>
-
-  </div>
-</div>
-
-
 
     <!-- tabel med nuværende opgaver -->
     <div>
@@ -162,22 +208,22 @@
             <tr>
               <th>
                 <button type="button" data-sort="ID">
-                ID
-                <span class="material-symbols-outlined">unfold_more</span>
+                  ID
+                  <span class="material-symbols-outlined">unfold_more</span>
                 </button>
               </th>
 
               <th>
                 <button type="button" data-sort="Title">
-                Title
-                <span class="material-symbols-outlined">unfold_more</span>
-               </button>
+                  Title
+                  <span class="material-symbols-outlined">unfold_more</span>
+                </button>
               </th>
 
               <th>
                 <button type="button" data-sort="Type">
-                Type
-                <span class="material-symbols-outlined">unfold_more</span>
+                  Type
+                  <span class="material-symbols-outlined">unfold_more</span>
                 </button>
               </th>
 
@@ -186,7 +232,6 @@
               <th>Latitude</th>
               <th>Longitude</th>
               <th id="edit">Handlinger</th>
-              
             </tr>
           </thead>
           <tbody></tbody>
@@ -218,7 +263,7 @@
     </div>
 
     <!-- footer -->
-    <footer class="global-footer">
+    <footer class="global-footer mobile-only">
       <div>
         <a
           class="button-primary button"
@@ -230,10 +275,11 @@
       </div>
       <div>
         <button class="button button-secondary" onclick="openCreateModal()">
-    <span class="material-symbols-outlined"> add </span>
-    NY OPGAVE
-</button>
+          <span class="material-symbols-outlined"> add </span>
+          NY OPGAVE
+        </button>
       </div>
     </footer>
+    <div id="modal-overlay" class="modal-overlay"></div>
   </body>
 </html>

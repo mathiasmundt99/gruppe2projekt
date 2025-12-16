@@ -1056,9 +1056,7 @@ a:focus, a.link-focus{
 a:visited, a.link-visited{
   color:#800080;
 }
-a:hover, a.link-hover{
-  color:#1a1a1a;
-}
+
 a.bold-link{
   font-weight:600;
 }
@@ -7841,9 +7839,7 @@ button.accordion-bulk-button[data-accordion-bulk-expand=false]{
   padding:0;
   border:0;
 }
-.button:hover, .button.button-hover, .button:active, .button.button-active{
-  text-decoration:underline;
-}
+
 .button:disabled, .button.disabled{
   opacity:0.25;
   cursor:not-allowed;
