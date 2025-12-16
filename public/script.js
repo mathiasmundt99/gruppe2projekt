@@ -1,244 +1,40 @@
-document.addEventListener("DOMContentLoaded", function() {
-    DKFDS.init();
-    loadTasks();
-});
-
+// varianler
 const API_URL = "https://gruppe2-opgaver.onrender.com/opgaver";
 
 let editMode = false;
 let editID = null;
 let allTasks = [];
+let filteredTasks = [];
 let currentPage = 1;
 let rowsPerPage = 10;
-let filteredTasks = [];
 let sortColumn = null;
 let sortDirection = "asc";
 
-// Hent alle opgaver
+// initiering
+document.addEventListener("DOMContentLoaded", function() {
+    DKFDS.init();
+    loadTasks();
+});
+
+// Api funktioner
 async function loadTasks() {
-   const res = await fetch(API_URL);
+    try{
+    const res = await fetch(API_URL);
     allTasks = await res.json();
     filteredTasks = allTasks;
     currentPage = 1;
     renderPaginatedTasks();
-}
-
-// Opret alle opgaver
-function renderTasks(tasks) {
-  const tbody = document.querySelector("#task-table tbody");
-  tbody.innerHTML = "";
-
-  tasks.forEach(task => {
-    const tr = document.createElement("tr");
-
-    const columns = [
-      { label: "ID", value: task.ID },
-      { label: "Title", value: task.Title },
-      { label: "Type", value: task.Type },
-      { label: "Location", value: task.Location },
-      { label: "Options", value: Array.isArray(task.Options) ? task.Options.join(", ") : task.Options },
-      { label: "Latitude", value: task.Latitude },
-      { label: "Longitude", value: task.Longitude }
-    ];
-
-    columns.forEach(col => {
-  const td = document.createElement("td");
-  td.setAttribute("data-title", col.label);
-
-  if (col.label === "Options" && Array.isArray(task.Options)) {
-    td.innerHTML = "";
-    task.Options.forEach(option => {
-      const span = document.createElement("span");
-      span.className = "task-option"; 
-      span.textContent = option;
-      td.appendChild(span);
-    });
-  } else {
-    td.textContent = col.value;
-  }
-
-  tr.appendChild(td);
-});
-
-    // handlinger
-    const actionTd = document.createElement("td");
-actionTd.className = "actions-cell";
-
-// løsning til desktop
-const actions = document.createElement("div");
-actions.className = "actions desktop-only";
-
-const trigger = document.createElement("button");
-trigger.className = "actions-trigger";
-trigger.innerHTML = `<span class="material-symbols-outlined">more_vert</span>`;
-
-const menu = document.createElement("div");
-menu.className = "actions-menu";
-
-const editBtn = document.createElement("button");
-editBtn.className = "editBtn";
-editBtn.innerHTML = `<span class="material-symbols-outlined">
-edit_square
-</span> Rediger`
-editBtn.onclick = () => startEdit(task.ID);
-
-const deleteBtn = document.createElement("button");
-deleteBtn.innerHTML = `<span class="material-symbols-outlined">
-delete
-</span> Slet`
-deleteBtn.className = "danger";
-deleteBtn.onclick = () => deleteTask(task.ID);
-
-const separator = document.createElement("span");
-separator.className = "actions-separator";
-
-menu.appendChild(editBtn);
-menu.appendChild(separator);
-menu.appendChild(deleteBtn);
-
-trigger.onclick = (e) => {
-  e.stopPropagation();
-  toggleActions(actions);
-};
-
-actions.appendChild(trigger);
-actions.appendChild(menu);
-
-/* løsning til mobil */
-const mobileActions = document.createElement("div");
-mobileActions.className = "mobile-actions mobile-only";
-
-const mobileEdit = document.createElement("button");
-mobileEdit.className = "button button-primary ";
-mobileEdit.textContent = "Rediger";
-mobileEdit.onclick = () => startEdit(task.ID);
-
-const mobileDelete = document.createElement("button");
-mobileDelete.className = "button button-secondary";
-mobileDelete.textContent = "Slet";
-mobileDelete.onclick = () => deleteTask(task.ID);
-
-mobileActions.appendChild(mobileEdit);
-mobileActions.appendChild(mobileDelete);
-
-/* append det hele */
-actionTd.appendChild(actions);
-actionTd.appendChild(mobileActions);
-tr.appendChild(actionTd);
-
- tbody.appendChild(tr);
-  });
-}
-
-function toggleActions(actionsEl) {
-  // Luk alle andre
-  document.querySelectorAll(".actions.open").forEach(el => {
-    if (el !== actionsEl) el.classList.remove("open");
-  });
-
-  actionsEl.classList.toggle("open");
-}
-
-// Luk menu ved klik udenfor
-document.addEventListener("click", () => {
-  document.querySelectorAll(".actions.open").forEach(el => {
-    el.classList.remove("open");
-  });
-});
-
-
-// søgefunktion
-function searchTasks() {
-    const searchValue = document.getElementById("search-input").value.toLowerCase();
-
-    filteredTasks = allTasks.filter(task => 
-        task.Title.toLowerCase().includes(searchValue) ||
-        task.Type.toLowerCase().includes(searchValue) ||
-        task.Location.toLowerCase().includes(searchValue)
-    );
-
-    currentPage = 1;
-    renderPaginatedTasks();
-}
-
-// pagination
-function renderPaginatedTasks() {
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-
-    const paginatedTasks = filteredTasks.slice(start, end);
-
-    renderTasks(paginatedTasks);
-    updatePaginationInfo();
-}
-
-// opdater pagination info på frontenden
-function updatePaginationInfo() {
-    const total = filteredTasks.length;
-    const start = total === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
-    const end = Math.min(start + rowsPerPage - 1, total);
-
-    document.querySelector(".displayed-rows").textContent = `${start}-${end}`;
-    document.querySelector(".total-rows").textContent = total;
-    document.getElementById("current-page").textContent = `Side ${currentPage}`;
-}
-
-// sorter kolonner  i tabel
-function sortTasks(column) {
-    if (sortColumn === column) {
-        sortDirection = sortDirection === "asc" ? "desc" : "asc";
-    } else {
-        sortColumn = column;
-        sortDirection = "asc";
+    } catch(error){
+        console.error(error);
+        alert("Kunne ikke hente opgaver, prøv igen senere")
     }
-
-    filteredTasks.sort((a, b) => {
-        let valueA = a[column];
-        let valueB = b[column];
-
-        if (column === "ID") {
-            return sortDirection === "asc"
-                ? valueA - valueB
-                : valueB - valueA;
-        }
-
-        valueA = valueA.toLowerCase();
-        valueB = valueB.toLowerCase();
-
-        if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
-        if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
-        return 0;
-    });
-
-    currentPage = 1;
-    renderPaginatedTasks();
-    updateSortIcons();
+    
 }
 
-// opdater sorter ikon 
-function updateSortIcons() {
-    document.querySelectorAll("th button").forEach(btn => {
-        const span = btn.querySelector("span");
-        if (span) {
-            span.textContent = "unfold_more";
-        }
-    });
-
-    const activeBtn = document.querySelector(`[data-sort="${sortColumn}"]`);
-    if (!activeBtn) return;
-
-    const activeSpan = activeBtn.querySelector("span");
-    if (!activeSpan) return;
-
-    activeSpan.textContent =
-        sortDirection === "asc" ? "keyboard_arrow_up" : "keyboard_arrow_down";
-}
-
-// Opret opgave
 async function createTask() {
-    if (!validateForm()) return; // Stop hvis form er ugyldig
-
-    const task = getFormData();
+    if (!validateForm()) return;
+    try{
+        const task = getFormData();
     await fetch(`${API_URL}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -247,50 +43,19 @@ async function createTask() {
 
     clearForm();
     loadTasks();
-    closeModal("open"); // Luk modal efter oprettelse
+    closeModal("open");
+
+    } catch(error){
+        console.error(error);
+        alert("Kunne ikke oprette opgaven, prøv igen senere")
+    }
 }
 
-// åben modal
-function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.add("fds-modal--open");
-    modal.setAttribute("aria-hidden", "false");
-
-    document.body.classList.add("modal-open");
-
-    // vis overlay
-    document.getElementById("modal-overlay").classList.add("active");
-}
-
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.remove("fds-modal--open");
-    modal.setAttribute("aria-hidden", "true");
-
-    document.body.classList.remove("modal-open");
-    document.getElementById("modal-overlay").classList.remove("active");
-
-    clearValidationErrors(); // <-- tilføj her også, så det altid ryddes
-}
-
-// modal specifikt til opret opgave
-function openCreateModal() {
-    clearForm();
-    clearValidationErrors(); // <-- tilføj her
-
-    document.getElementById("modal-example-heading").textContent = "Opret ny opgave";
-    document.querySelector('button[onclick="createTask()"]').style.display = "block";
-    document.getElementById("updateBtn").style.display = "none";
-
-    openModal("open"); 
-}
-
-// rediger opgave
 async function startEdit(id) {
-    const res = await fetch(`${API_URL}/${id}`);
+    try{
+        const res = await fetch(`${API_URL}/${id}`);
     const task = await res.json();
 
-    // Udfyld formular
     document.getElementById("title").value = task.Title;
     document.getElementById("description").value = task.Description;
     document.getElementById("type").value = task.Type;
@@ -304,34 +69,25 @@ async function startEdit(id) {
     document.getElementById("completed").value = task.Completed ? "true" : "false";
     document.getElementById("difficulty").value = task.Difficulty;
 
-    // Skift UI til rediger-tilstand
     editMode = true;
     editID = id;
 
-    // Sæt overskrift
     document.getElementById("modal-example-heading").textContent = "Rediger opgave";
-
-    // Vis/skjul knapper
     document.querySelector('button[onclick="createTask()"]').style.display = "none";
     document.getElementById("updateBtn").style.display = "block";
 
-   openModal("open");
+    openModal("open");
+
+    } catch(error){
+        console.error(error);
+        alert("Kunne ikke redigere opgaven, prøv igen senere")
+    }
 }
 
-// DELETE opgave
-async function deleteTask(id) {
-    if (!confirm("Er du sikker på, at du vil slette denne opgave?")) return;
-
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-    loadTasks();
-}
-
-// Gem ændringer
 async function updateTask() {
-    if (!validateForm()) return; // Stop hvis form er ugyldig
-
+    if (!validateForm()) return;
+    try{
     const updated = getFormData();
-
     await fetch(`${API_URL}/${editID}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -341,9 +97,245 @@ async function updateTask() {
     clearForm();
     loadTasks();
     closeModal("open");
+    }catch(error){
+        console.error(error);
+        alert("Kunne ikke opdatere opgaven, prøv igen senere")
+    }
 }
 
-// Hent input fra formularen
+async function deleteTask(id) {
+    if (!confirm("Er du sikker på, at du vil slette denne opgave?")) return;
+    try{
+    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    loadTasks();
+
+    }catch(error){
+        console.error(error);
+        alert("Kunne ikke slette opgaven, prøv igen senere")
+    }
+}
+
+// rendering
+function renderTasks(tasks) {
+    const tbody = document.querySelector("#task-table tbody");
+    tbody.innerHTML = "";
+
+    tasks.forEach(task => {
+        const tr = document.createElement("tr");
+
+        const columns = [
+            { label: "ID", value: task.ID },
+            { label: "Title", value: task.Title },
+            { label: "Type", value: task.Type },
+            { label: "Location", value: task.Location },
+            { label: "Options", value: Array.isArray(task.Options) ? task.Options.join(", ") : task.Options },
+            { label: "Latitude", value: task.Latitude },
+            { label: "Longitude", value: task.Longitude }
+        ];
+
+        columns.forEach(col => {
+            const td = document.createElement("td");
+            td.setAttribute("data-title", col.label);
+
+            if (col.label === "Options" && Array.isArray(task.Options)) {
+                td.innerHTML = "";
+                task.Options.forEach(option => {
+                    const span = document.createElement("span");
+                    span.className = "task-option"; 
+                    span.textContent = option;
+                    td.appendChild(span);
+                });
+            } else {
+                td.textContent = col.value;
+            }
+
+            tr.appendChild(td);
+        });
+
+        // Handlinger (desktop)
+        const actionTd = document.createElement("td");
+        actionTd.className = "actions-cell";
+
+        const actions = document.createElement("div");
+        actions.className = "actions desktop-only";
+
+        const trigger = document.createElement("button");
+        trigger.className = "actions-trigger";
+        trigger.innerHTML = `<span class="material-symbols-outlined">more_vert</span>`;
+
+        const menu = document.createElement("div");
+        menu.className = "actions-menu";
+
+        const editBtn = document.createElement("button");
+        editBtn.className = "editBtn";
+        editBtn.innerHTML = `<span class="material-symbols-outlined">edit_square</span> Rediger`;
+        editBtn.onclick = () => startEdit(task.ID);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "danger";
+        deleteBtn.innerHTML = `<span class="material-symbols-outlined">delete</span> Slet`;
+        deleteBtn.onclick = () => deleteTask(task.ID);
+
+        const separator = document.createElement("span");
+        separator.className = "actions-separator";
+
+        menu.appendChild(editBtn);
+        menu.appendChild(separator);
+        menu.appendChild(deleteBtn);
+
+        trigger.onclick = (e) => {
+            e.stopPropagation();
+            toggleActions(actions);
+        };
+
+        actions.appendChild(trigger);
+        actions.appendChild(menu);
+
+        // Handlinger (mobil)
+        const mobileActions = document.createElement("div");
+        mobileActions.className = "mobile-actions mobile-only";
+
+        const mobileEdit = document.createElement("button");
+        mobileEdit.className = "button button-primary";
+        mobileEdit.textContent = "Rediger";
+        mobileEdit.onclick = () => startEdit(task.ID);
+
+        const mobileDelete = document.createElement("button");
+        mobileDelete.className = "button button-secondary";
+        mobileDelete.textContent = "Slet";
+        mobileDelete.onclick = () => deleteTask(task.ID);
+
+        mobileActions.appendChild(mobileEdit);
+        mobileActions.appendChild(mobileDelete);
+
+        actionTd.appendChild(actions);
+        actionTd.appendChild(mobileActions);
+        tr.appendChild(actionTd);
+
+        tbody.appendChild(tr);
+    });
+}
+
+function toggleActions(actionsEl) {
+    document.querySelectorAll(".actions.open").forEach(el => {
+        if (el !== actionsEl) el.classList.remove("open");
+    });
+    actionsEl.classList.toggle("open");
+}
+
+document.addEventListener("click", () => {
+    document.querySelectorAll(".actions.open").forEach(el => el.classList.remove("open"));
+});
+
+
+// Pagination
+function renderPaginatedTasks() {
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const paginatedTasks = filteredTasks.slice(start, end);
+
+    renderTasks(paginatedTasks);
+    updatePaginationInfo();
+}
+
+function updatePaginationInfo() {
+    const total = filteredTasks.length;
+    const start = total === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+    const end = Math.min(start + rowsPerPage - 1, total);
+
+    document.querySelector(".displayed-rows").textContent = `${start}-${end}`;
+    document.querySelector(".total-rows").textContent = total;
+    document.getElementById("current-page").textContent = `Side ${currentPage}`;
+}
+
+// søgning
+function searchTasks() {
+    const searchValue = document.getElementById("search-input").value.toLowerCase();
+
+    filteredTasks = allTasks.filter(task => 
+        task.Title.toLowerCase().includes(searchValue) ||
+        task.Type.toLowerCase().includes(searchValue) ||
+        task.Location.toLowerCase().includes(searchValue)
+    );
+
+    currentPage = 1;
+    renderPaginatedTasks();
+}
+
+// sortering
+function sortTasks(column) {
+    if (sortColumn === column) {
+        sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    } else {
+        sortColumn = column;
+        sortDirection = "asc";
+    }
+
+    filteredTasks.sort((a, b) => {
+        let valueA = a[column];
+        let valueB = b[column];
+
+        if (column === "ID") return sortDirection === "asc" ? valueA - valueB : valueB - valueA;
+
+        valueA = valueA ? valueA.toString().toLowerCase() : "";
+        valueB = valueB ? valueB.toString().toLowerCase() : "";
+
+        if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+        if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+    });
+
+    currentPage = 1;
+    renderPaginatedTasks();
+    updateSortIcons();
+}
+
+function updateSortIcons() {
+    document.querySelectorAll("th button").forEach(btn => {
+        const span = btn.querySelector("span");
+        if (span) span.textContent = "unfold_more";
+    });
+
+    const activeBtn = document.querySelector(`[data-sort="${sortColumn}"]`);
+    if (!activeBtn) return;
+
+    const activeSpan = activeBtn.querySelector("span");
+    if (!activeSpan) return;
+
+    activeSpan.textContent = sortDirection === "asc" ? "keyboard_arrow_up" : "keyboard_arrow_down";
+}
+
+// modal og form
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if(!modal) return console.warn(`Modal med id ${modalId} findes ikke`)
+    modal.classList.add("fds-modal--open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+    document.getElementById("modal-overlay").classList.add("active");
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if(!modal) return console.warn(`Modal med id ${modalId} findes ikke`)
+    modal.classList.remove("fds-modal--open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+    document.getElementById("modal-overlay").classList.remove("active");
+    clearValidationErrors();
+}
+
+function openCreateModal() {
+    clearForm();
+    clearValidationErrors();
+
+    document.getElementById("modal-example-heading").textContent = "Opret ny opgave";
+    document.querySelector('button[onclick="createTask()"]').style.display = "block";
+    document.getElementById("updateBtn").style.display = "none";
+
+    openModal("open");
+}
+
 function getFormData() {
     return {
         Title: document.getElementById("title").value,
@@ -353,7 +345,6 @@ function getFormData() {
         Radius: Number(document.getElementById("radius").value),
         Latitude: Number(document.getElementById("latitude").value),
         Longitude: Number(document.getElementById("longitude").value),
-
         Options: document.getElementById("options").value,
         ActivationCondition: document.getElementById("activationCondition").value,
         Activated: document.getElementById("activated").value === "true",
@@ -362,8 +353,6 @@ function getFormData() {
     };
 }
 
-
-// Ryd formular
 function clearForm() {
     document.getElementById("title").value = "";
     document.getElementById("description").value = "";
@@ -377,11 +366,10 @@ function clearForm() {
     document.getElementById("activated").value = "false";
     document.getElementById("completed").value = "false";
     document.getElementById("difficulty").value = "";
-//måske luk her også modal
 }
 
+// validering
 function validateForm() {
-    // Liste over felter der skal valideres
     const requiredFields = [
         "title", "description", "type", "location", 
         "radius", "latitude", "longitude", "options", 
@@ -395,11 +383,8 @@ function validateForm() {
 
         if (!input.value.trim()) {
             isValid = false;
-
-            // Tilføj fejlklasse (kan styles i CSS)
             input.classList.add("error");
 
-            // Hvis du vil vise en tooltip eller besked
             if (!input.nextElementSibling || !input.nextElementSibling.classList.contains("error-message")) {
                 const errorMessage = document.createElement("span");
                 errorMessage.className = "error-message";
@@ -407,7 +392,6 @@ function validateForm() {
                 input.parentNode.appendChild(errorMessage);
             }
         } else {
-            // Fjern fejl hvis feltet nu er udfyldt
             input.classList.remove("error");
             if (input.nextElementSibling && input.nextElementSibling.classList.contains("error-message")) {
                 input.nextElementSibling.remove();
@@ -419,27 +403,20 @@ function validateForm() {
 }
 
 function clearValidationErrors() {
-    // Fjern alle fejlklasser
     document.querySelectorAll(".error").forEach(el => el.classList.remove("error"));
-
-    // Fjern alle fejlmeddelelser
     document.querySelectorAll(".error-message").forEach(el => el.remove());
 }
 
-
-
-// addEventListeners
+// event listeners
 document.querySelectorAll("[data-modal-close]").forEach(btn => {
     btn.addEventListener("click", () => {
         const modal = btn.closest(".fds-modal");
-        closeModal(modal.id); 
+        closeModal(modal.id);
     });
 });
 
-// klik på søgeknap
-document.getElementById("search-btn").addEventListener("click", searchTasks)
+document.getElementById("search-btn").addEventListener("click", searchTasks);
 
-// forrige side pagination knap
 document.getElementById("prev-page").addEventListener("click", () => {
     if (currentPage > 1) {
         currentPage--;
@@ -447,29 +424,20 @@ document.getElementById("prev-page").addEventListener("click", () => {
     }
 });
 
-// næste side pagination knap
 document.getElementById("next-page").addEventListener("click", () => {
     const maxPages = Math.ceil(filteredTasks.length / rowsPerPage);
-
     if (currentPage < maxPages) {
         currentPage++;
         renderPaginatedTasks();
     }
 });
 
-// ændring af hvor mange opgaver man vil se på hver side
 document.getElementById("pagination-pages").addEventListener("change", (e) => {
-    rowsPerPage = e.target.value === "all"
-        ? Infinity
-        : Number(e.target.value);
-
-    currentPage = 1;
+    rowsPerPage = e.target.value === "all" ? Infinity : Number(e.target.value);
+    currentPage = Math.min(currentPage, Math.ceil(filteredTasks.length / rowsPerPage) || 1);
     renderPaginatedTasks();
 });
 
 document.querySelectorAll("th button[data-sort]").forEach(btn => {
-    btn.addEventListener("click", () => {
-        sortTasks(btn.dataset.sort);
-    });
+    btn.addEventListener("click", () => sortTasks(btn.dataset.sort));
 });
-
