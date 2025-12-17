@@ -418,6 +418,12 @@ document.querySelectorAll("[data-modal-close]").forEach(btn => {
 
 document.getElementById("search-btn").addEventListener("click", searchTasks);
 
+document.getElementById("search-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        searchTasks();
+    }
+});
+
 document.getElementById("prev-page").addEventListener("click", () => {
     if (currentPage > 1) {
         currentPage--;
