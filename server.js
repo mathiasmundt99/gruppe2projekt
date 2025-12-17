@@ -168,7 +168,7 @@ const server = http.createServer((req, res) => {
             if (!ok) return notFound(res);
 
             console.log(`Task ${id} slettet succesfuldt`);
-            res.writeHead(204); // No Content
+            res.writeHead(204);
             return res.end();
         } catch (error) {
             console.error(`Fejl ved sletning af opgave ${id}:`, error);
