@@ -5,6 +5,7 @@ const path = require("path");
 const { writeExportFile } = require("./opgaveService");
 
 const {
+    // Importerer funktioner fra opgaveService.js
     getAllTasks,
     getTask,
     createTask,
@@ -16,16 +17,19 @@ const {
 
 // hjælper funktioner
 
+// Sender JSON-response med status 200
 function sendJSON(res, data) {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify(data));
 }
 
+// Standard 404-response
 function notFound(res) {
     res.writeHead(404);
     res.end("Not Found");
 }
 
+// Sætter CORS-headers så frontend kan tilgå serveren
 function setHeaders(res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
@@ -35,8 +39,10 @@ function setHeaders(res) {
 // server
 
 const server = http.createServer((req, res) => {
+    // Tilføj CORS-headers til alle requests
     setHeaders(res);
 
+    // Parser URL og HTTP-metode
     const parsedUrl = url.parse(req.url, true);
     const pathName = parsedUrl.pathname;
     const method = req.method;
@@ -50,11 +56,13 @@ const server = http.createServer((req, res) => {
     //  static file routing
     if (method === "GET" && pathName.startsWith("/staticfiles/")) {
 
+        // Udtræk filnavnet fra URL'en
         const fileName = pathName.replace("/staticfiles/", "");
         const filePath = path.join(__dirname, "staticfiles", fileName);
 
         console.log("Henter statisk fil:", filePath);
 
+        // Tjekker om filen findes og sender den
         if (fs.existsSync(filePath)) {
             try {
                 const file = fs.readFileSync(filePath);
