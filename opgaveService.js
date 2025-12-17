@@ -17,7 +17,8 @@ function getAllTasks() {
 function getTask(id) {
     try {
         const tasks = readExcel();
-    return tasks.find(t => t.ID === Number(id));
+        // Finder den opgave hvor ID matcher
+        return tasks.find(t => t.ID === Number(id));
     } catch (error) {
         console.error("Fejl ved hentning én opgave:", error);
     }
@@ -26,6 +27,7 @@ function getTask(id) {
 // Hjælpefunktion til ny ID
 function getNextID(tasks) {
     if (tasks.length === 0) return 1;
+    // Finder det højeste nuværende ID og returnerer det + 1
     return Math.max(...tasks.map(t => t.ID)) + 1;
 }
 
@@ -33,9 +35,12 @@ function getNextID(tasks) {
 function createTask(taskData) {
     try {
         const tasks = readExcel();
+        // Opretter nyt Task-objekt med nyt ID 
         const newTask = new Task({ ...taskData, ID: getNextID(tasks) });
+        // Tilføjer opgaven og gemmer til Excel
         tasks.push(newTask);
         writeExcel(tasks);
+        // Opdaterer statisk JSON-fil
         writeExportFile();
         return newTask;
     } catch (error) {
@@ -48,9 +53,11 @@ function createTask(taskData) {
 function updateTask(id, updates) {
     try {
         const tasks = readExcel();
+        // Finder index for opgaven der skal opdateres
         const index = tasks.findIndex(t => t.ID === Number(id));
         if (index === -1) return null;
 
+        // Opretter en ny Task med de opdaterede data
         const updated = new Task({ ...tasks[index], ...updates, ID: tasks[index].ID });
         tasks[index] = updated;
         writeExcel(tasks);
@@ -64,15 +71,16 @@ function updateTask(id, updates) {
 
 // DELETE opgave
 function deleteTask(id) {
-    try{
-    const tasks = readExcel();
-    const filtered = tasks.filter(t => t.ID !== Number(id));
+    try {
+        const tasks = readExcel();
+        // Filtrerer opgaverne for at fjerne den med det givne ID
+        const filtered = tasks.filter(t => t.ID !== Number(id));
 
-    if (filtered.length === tasks.length) return false;
+        if (filtered.length === tasks.length) return false;
 
-    writeExcel(filtered);
-    writeExportFile();
-    return true;
+        writeExcel(filtered);
+        writeExportFile();
+        return true;
     } catch (error) {
         console.error("Fejl ved sletning af opgave:", error);
         return null;
@@ -95,21 +103,21 @@ function exportAllTasks() {
 function writeExportFile() {
     const dirPath = path.join(__dirname, "staticfiles");
     const filePath = path.join(dirPath, "opgaver.json");
-    try{
+    try {
         // Opret mappe hvis den ikke findes
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath);
-    }
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath);
+        }
 
-    // Hent alle tasks i shared format
-    const tasks = exportAllTasks();
+        // Hent alle tasks i shared format
+        const tasks = exportAllTasks();
 
-    // Skriv filen
-    fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2), "utf8");
+        // Skriv filen
+        fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2), "utf8");
 
-    console.log("Static exportfil opdateret:", filePath);
-    } catch(error){
-         console.error("Fejl ved skrivning af exportfil:", error);
+        console.log("Static exportfil opdateret:", filePath);
+    } catch (error) {
+        console.error("Fejl ved skrivning af exportfil:", error);
     }
 }
 
