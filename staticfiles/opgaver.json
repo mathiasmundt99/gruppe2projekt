@@ -14,8 +14,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Let",
-    "latitude": 8.2501,
-    "longitude": 55.7398
+    "latitude": 55.7398,
+    "longitude": 8.2501
   },
   {
     "id": 2,
@@ -33,8 +33,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Øvet",
-    "latitude": 8.252,
-    "longitude": 55.7405
+    "latitude": 55.7405,
+    "longitude": 8.252
   },
   {
     "id": 3,
@@ -52,8 +52,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Svær",
-    "latitude": 8.2498,
-    "longitude": 55.7412
+    "latitude": 55.7412,
+    "longitude": 8.2498
   },
   {
     "id": 4,
@@ -71,8 +71,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Let",
-    "latitude": 8.248,
-    "longitude": 55.748
+    "latitude": 55.748,
+    "longitude": 8.248
   },
   {
     "id": 5,
@@ -89,8 +89,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Øvet",
-    "latitude": 8.2512,
-    "longitude": 55.7395
+    "latitude": 55.7395,
+    "longitude": 8.2512
   },
   {
     "id": 6,
@@ -107,8 +107,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Svær",
-    "latitude": 8.253,
-    "longitude": 55.742
+    "latitude": 55.742,
+    "longitude": 8.253
   },
   {
     "id": 7,
@@ -126,8 +126,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Let",
-    "latitude": 8.253,
-    "longitude": 55.742
+    "latitude": 55.742,
+    "longitude": 8.253
   },
   {
     "id": 8,
@@ -144,8 +144,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Øvet",
-    "latitude": 8.5681,
-    "longitude": 56.1541
+    "latitude": 56.1541,
+    "longitude": 8.5681
   },
   {
     "id": 9,
@@ -162,8 +162,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Svær",
-    "latitude": 8.6,
-    "longitude": 56.2
+    "latitude": 56.2,
+    "longitude": 8.6
   },
   {
     "id": 10,
@@ -181,8 +181,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Let",
-    "latitude": 8.62,
-    "longitude": 56.21
+    "latitude": 56.21,
+    "longitude": 8.62
   },
   {
     "id": 11,
@@ -200,8 +200,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Øvet",
-    "latitude": 8.63,
-    "longitude": 56.212
+    "latitude": 56.212,
+    "longitude": 8.63
   },
   {
     "id": 12,
@@ -219,8 +219,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Svær",
-    "latitude": 8.64,
-    "longitude": 56.215
+    "latitude": 56.215,
+    "longitude": 8.64
   },
   {
     "id": 13,
@@ -238,8 +238,8 @@
     "activated": false,
     "completed": false,
     "difficulty": "Let",
-    "latitude": 8.65,
-    "longitude": 56.218
+    "latitude": 56.218,
+    "longitude": 8.65
   },
   {
     "id": 14,
@@ -256,7 +256,7 @@
     "activated": false,
     "completed": false,
     "difficulty": "Svær",
-    "latitude": 8.5681,
-    "longitude": 56.1541
+    "latitude": 56.1541,
+    "longitude": 8.5681
   }
 ]
