@@ -65,8 +65,6 @@ async function startEdit(id) {
         document.getElementById("longitude").value = formatCoord(task.Longitude);
         document.getElementById("options").value = task.Options.join(";");
         document.getElementById("activationCondition").value = task.ActivationCondition;
-        document.getElementById("activated").value = task.Activated ? "true" : "false";
-        document.getElementById("completed").value = task.Completed ? "true" : "false";
         document.getElementById("difficulty").value = task.Difficulty;
 
         editMode = true;
@@ -354,8 +352,6 @@ function getFormData() {
         Longitude: Number(document.getElementById("longitude").value),
         Options: document.getElementById("options").value,
         ActivationCondition: document.getElementById("activationCondition").value,
-        Activated: document.getElementById("activated").value === "true",
-        Completed: document.getElementById("completed").value === "true",
         Difficulty: document.getElementById("difficulty").value
     };
 }
@@ -370,8 +366,6 @@ function clearForm() {
     document.getElementById("longitude").value = "";
     document.getElementById("options").value = "";
     document.getElementById("activationCondition").value = "";
-    document.getElementById("activated").value = "false";
-    document.getElementById("completed").value = "false";
     document.getElementById("difficulty").value = "";
 }
 
