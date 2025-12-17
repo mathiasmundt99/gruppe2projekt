@@ -11,74 +11,74 @@ let sortColumn = null;
 let sortDirection = "asc";
 
 // initiering
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     DKFDS.init();
     loadTasks();
 });
 
 // Api funktioner
 async function loadTasks() {
-    try{
-    const res = await fetch(API_URL);
-    allTasks = await res.json();
-    filteredTasks = allTasks;
-    currentPage = 1;
-    renderPaginatedTasks();
-    } catch(error){
+    try {
+        const res = await fetch(API_URL);
+        allTasks = await res.json();
+        filteredTasks = allTasks;
+        currentPage = 1;
+        renderPaginatedTasks();
+    } catch (error) {
         console.error(error);
         alert("Kunne ikke hente opgaver, prøv igen senere")
     }
-    
+
 }
 
 async function createTask() {
     if (!validateForm()) return;
-    try{
+    try {
         const task = getFormData();
-    await fetch(`${API_URL}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(task)
-    });
+        await fetch(`${API_URL}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(task)
+        });
 
-    clearForm();
-    loadTasks();
-    closeModal("open");
+        clearForm();
+        loadTasks();
+        closeModal("open");
 
-    } catch(error){
+    } catch (error) {
         console.error(error);
         alert("Kunne ikke oprette opgaven, prøv igen senere")
     }
 }
 
 async function startEdit(id) {
-    try{
+    try {
         const res = await fetch(`${API_URL}/${id}`);
-    const task = await res.json();
+        const task = await res.json();
 
-    document.getElementById("title").value = task.Title;
-    document.getElementById("description").value = task.Description;
-    document.getElementById("type").value = task.Type;
-    document.getElementById("location").value = task.Location;
-    document.getElementById("radius").value = task.Radius;
-    document.getElementById("latitude").value = task.Latitude;
-    document.getElementById("longitude").value = task.Longitude;
-    document.getElementById("options").value = task.Options.join(";");
-    document.getElementById("activationCondition").value = task.ActivationCondition;
-    document.getElementById("activated").value = task.Activated ? "true" : "false";
-    document.getElementById("completed").value = task.Completed ? "true" : "false";
-    document.getElementById("difficulty").value = task.Difficulty;
+        document.getElementById("title").value = task.Title;
+        document.getElementById("description").value = task.Description;
+        document.getElementById("type").value = task.Type;
+        document.getElementById("location").value = task.Location;
+        document.getElementById("radius").value = task.Radius;
+        document.getElementById("latitude").value = task.Latitude;
+        document.getElementById("longitude").value = task.Longitude;
+        document.getElementById("options").value = task.Options.join(";");
+        document.getElementById("activationCondition").value = task.ActivationCondition;
+        document.getElementById("activated").value = task.Activated ? "true" : "false";
+        document.getElementById("completed").value = task.Completed ? "true" : "false";
+        document.getElementById("difficulty").value = task.Difficulty;
 
-    editMode = true;
-    editID = id;
+        editMode = true;
+        editID = id;
 
-    document.getElementById("modal-example-heading").textContent = "Rediger opgave";
-    document.querySelector('button[onclick="createTask()"]').style.display = "none";
-    document.getElementById("updateBtn").style.display = "block";
+        document.getElementById("modal-example-heading").textContent = "Rediger opgave";
+        document.querySelector('button[onclick="createTask()"]').style.display = "none";
+        document.getElementById("updateBtn").style.display = "block";
 
-    openModal("open");
+        openModal("open");
 
-    } catch(error){
+    } catch (error) {
         console.error(error);
         alert("Kunne ikke redigere opgaven, prøv igen senere")
     }
@@ -86,18 +86,18 @@ async function startEdit(id) {
 
 async function updateTask() {
     if (!validateForm()) return;
-    try{
-    const updated = getFormData();
-    await fetch(`${API_URL}/${editID}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updated)
-    });
+    try {
+        const updated = getFormData();
+        await fetch(`${API_URL}/${editID}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updated)
+        });
 
-    clearForm();
-    loadTasks();
-    closeModal("open");
-    }catch(error){
+        clearForm();
+        loadTasks();
+        closeModal("open");
+    } catch (error) {
         console.error(error);
         alert("Kunne ikke opdatere opgaven, prøv igen senere")
     }
@@ -105,17 +105,24 @@ async function updateTask() {
 
 async function deleteTask(id) {
     if (!confirm("Er du sikker på, at du vil slette denne opgave?")) return;
-    try{
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-    loadTasks();
+    try {
+        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        loadTasks();
 
-    }catch(error){
+    } catch (error) {
         console.error(error);
         alert("Kunne ikke slette opgaven, prøv igen senere")
     }
 }
 
 // rendering
+function formatCoord(value) {
+    if (value === null || value === undefined || value === "") return "";
+    const n = Number(value);
+    return Number.isFinite(n) ? n.toFixed(4) : "";
+}
+
+
 function renderTasks(tasks) {
     const tbody = document.querySelector("#task-table tbody");
     tbody.innerHTML = "";
@@ -129,8 +136,8 @@ function renderTasks(tasks) {
             { label: "Type", value: task.Type },
             { label: "Location", value: task.Location },
             { label: "Options", value: Array.isArray(task.Options) ? task.Options.join(", ") : task.Options },
-            { label: "Latitude", value: task.Latitude },
-            { label: "Longitude", value: task.Longitude }
+            { label: "Latitude", value: formatCoord(task.Latitude) },
+            { label: "Longitude", value: formatCoord(task.Longitude) }
         ];
 
         columns.forEach(col => {
@@ -141,7 +148,7 @@ function renderTasks(tasks) {
                 td.innerHTML = "";
                 task.Options.forEach(option => {
                     const span = document.createElement("span");
-                    span.className = "task-option"; 
+                    span.className = "task-option";
                     span.textContent = option;
                     td.appendChild(span);
                 });
@@ -252,7 +259,7 @@ function updatePaginationInfo() {
 function searchTasks() {
     const searchValue = document.getElementById("search-input").value.toLowerCase();
 
-    filteredTasks = allTasks.filter(task => 
+    filteredTasks = allTasks.filter(task =>
         task.Title.toLowerCase().includes(searchValue) ||
         task.Type.toLowerCase().includes(searchValue) ||
         task.Location.toLowerCase().includes(searchValue)
@@ -308,7 +315,7 @@ function updateSortIcons() {
 // modal og form
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
-    if(!modal) return console.warn(`Modal med id ${modalId} findes ikke`)
+    if (!modal) return console.warn(`Modal med id ${modalId} findes ikke`)
     modal.classList.add("fds-modal--open");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
@@ -317,7 +324,7 @@ function openModal(modalId) {
 
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
-    if(!modal) return console.warn(`Modal med id ${modalId} findes ikke`)
+    if (!modal) return console.warn(`Modal med id ${modalId} findes ikke`)
     modal.classList.remove("fds-modal--open");
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
@@ -371,8 +378,8 @@ function clearForm() {
 // validering
 function validateForm() {
     const requiredFields = [
-        "title", "description", "type", "location", 
-        "radius", "latitude", "longitude", "options", 
+        "title", "description", "type", "location",
+        "radius", "latitude", "longitude", "options",
         "activationCondition", "difficulty"
     ];
 
