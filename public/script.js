@@ -61,8 +61,8 @@ async function startEdit(id) {
         document.getElementById("type").value = task.Type;
         document.getElementById("location").value = task.Location;
         document.getElementById("radius").value = task.Radius;
-        document.getElementById("latitude").value = task.Latitude;
-        document.getElementById("longitude").value = task.Longitude;
+        document.getElementById("latitude").value = formatCoord(task.Latitude);
+        document.getElementById("longitude").value = formatCoord(task.Longitude);
         document.getElementById("options").value = task.Options.join(";");
         document.getElementById("activationCondition").value = task.ActivationCondition;
         document.getElementById("activated").value = task.Activated ? "true" : "false";
