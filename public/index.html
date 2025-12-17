@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Administrer og opret opgaver i opgavedatabasen" />
     <title>Opgave Manager</title>
     <!-- Egne styles og javascript filer -->
     <script defer src="./script.js"></script>
@@ -16,225 +19,314 @@
     <script src="./dkfds/dist/js/dkfds.js"></script>
   </head>
   <body>
-    <header>
+    <header aria-label="Hovednavigation">
       <div class="logo">
         <img src="./assets/logo-red.svg" alt="Logo" />
         <span>OPGAVEDATABASE</span>
       </div>
       <div class="mobile-only"></div>
     </header>
+    <main>
+      <section class="action-bar">
+        <div class="form-group search">
+          <label for="input-type-text" class="sr-only">Søg efter indhold</label>
+          <input
+            class="form-input input-char-27"
+            id="search-input"
+            type="search"
+            placeholder="Søg i opgaver"
+            aria-label="Søg i opgaver" />
 
-    <section class="action-bar">
-      <div class="form-group search">
-        <label for="input-type-text" class="sr-only">Søg efter indhold</label>
-        <input
-          class="form-input input-char-27"
-          id="search-input"
-          type="search"
-          placeholder="Søg i opgaver" />
-
-        <button class="button button-primary" id="search-btn">
-          <span class="material-symbols-outlined"> search </span>
-          Søg
-        </button>
-      </div>
-      <div class="desktop-only export">
-        <div>
-          <a
-            class="button-secondary button"
-            href="https://gruppe2-opgaver.onrender.com/staticfiles/opgaver.json"
-            download>
-            <span class="material-symbols-outlined"> download </span>
-            EKSPORTER LISTE
-          </a>
-        </div>
-        <div>
-          <button class="button button-primary" onclick="openCreateModal()">
-            <span class="material-symbols-outlined"> add </span>
-            NY OPGAVE
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- modal med opret ny opgave / rediger opgave -->
-    <div
-      class="fds-modal"
-      id="open"
-      aria-hidden="true"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-example-heading">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="modal-title" id="modal-example-heading">
-            Opret ny opgave
-          </h2>
-          <button class="modal-close function-link" data-modal-close>
-            <span class="material-symbols-outlined">close</span>
-            Luk
-          </button>
-        </div>
-
-        <div class="modal-body grid">
-          <div class="field full">
-            <label for="title">Titel</label>
-            <input id="title" type="text" placeholder="Eksempel: Velkomst" />
-          </div>
-
-          <div class="field full">
-            <label for="description">Beskrivelse</label>
-            <textarea
-              id="description"
-              rows="4"
-              placeholder="Eksempel: Start ved hovedindgangen til Nymindegablejren."></textarea>
-          </div>
-
-          <div class="field">
-            <label for="type">Type</label>
-            <input id="type" type="text" placeholder="Land / Sø" />
-          </div>
-
-          <div class="field">
-            <label for="location">Lokation</label>
-            <input
-              id="location"
-              type="text"
-              placeholder="Eksempel: Nymindegab, Hovedport" />
-          </div>
-
-          <div class="field">
-            <label for="radius">Radius (Meter)</label>
-            <input id="radius" type="number" placeholder="Eksempel: 22" />
-          </div>
-
-          <div class="field">
-            <label for="difficulty">Sværhedsgrad</label>
-            <input id="difficulty" placeholder="Let / Mellem / Svær" />
-          </div>
-
-          <div class="field">
-            <label for="latitude">Breddegrad</label>
-            <input
-              id="latitude"
-              type="number"
-              step="any"
-              placeholder="Eksempel: 55,7398" />
-          </div>
-
-          <div class="field">
-            <label for="longitude">Længdegrad</label>
-            <input
-              id="longitude"
-              type="number"
-              step="any"
-              placeholder="Eksempel: 8,2501" />
-          </div>
-
-          <div class="field">
-            <label for="options">Handlinger (adskilt af ; semikolon)</label>
-            <input
-              id="options"
-              placeholder="Eksempel: Start;Læs historie først" />
-          </div>
-
-          <div class="field">
-            <label for="activationCondition">Aktiveringsbetingelse</label>
-            <input id="activationCondition" placeholder="Eksempel:Lokalitet " />
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="button button-primary" onclick="clearForm()">
-            Ryd formular
-          </button>
-          <button class="button button-secondary" onclick="createTask()">
-            OPRET OPGAVE
-          </button>
           <button
-            id="updateBtn"
-            class="button button-secondary"
-            onclick="updateTask()"
-            style="display: none">
-            Gem ændringer
+            class="button button-primary"
+            id="search-btn"
+            aria-label="Udfør søgning">
+            <span class="material-symbols-outlined" aria-hidden="true">
+              search
+            </span>
+            Søg
           </button>
         </div>
-      </div>
-    </div>
-
-    <!-- tabel med nuværende opgaver -->
-    <div>
-      <p
-        aria-live="polite"
-        aria-atomic="true"
-        class="rows-message"
-        id="table-pagination-message">
-        Viser <strong class="displayed-rows">1-10</strong> af
-        <strong class="total-rows">0</strong> rækker
-      </p>
-
-      <div class="table--responsive-scroll" tabindex="0">
-        <table class="table table--responsive-headers" id="task-table">
-          <thead>
-            <tr>
-              <th>
-                <button type="button" data-sort="ID">
-                  ID
-                  <span class="material-symbols-outlined">unfold_more</span>
-                </button>
-              </th>
-
-              <th>
-                <button type="button" data-sort="Title">
-                  Titel
-                  <span class="material-symbols-outlined">unfold_more</span>
-                </button>
-              </th>
-
-              <th>
-                <button type="button" data-sort="Type">
-                  Type
-                  <span class="material-symbols-outlined">unfold_more</span>
-                </button>
-              </th>
-
-              <th>Lokation</th>
-              <th>Muligheder</th>
-              <th>Breddegrad</th>
-              <th>Længdegrad</th>
-              <th id="edit">Handlinger</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div class="table-pagination-options">
-        <div class="form-group">
-          <label class="form-label" for="pagination-pages"
-            >Vis rækker per side:</label
-          >
-          <select class="form-select" id="pagination-pages">
-            <option value="5">5</option>
-            <option value="10" selected>10</option>
-            <option value="20">20</option>
-            <option value="all">Alle</option>
-          </select>
+        <div class="desktop-only export">
+          <div>
+            <a
+              class="button-secondary button"
+              href="https://gruppe2-opgaver.onrender.com/staticfiles/opgaver.json"
+              download>
+              <span class="material-symbols-outlined" aria-hidden="true">
+                download
+              </span>
+              EKSPORTER LISTE
+            </a>
+          </div>
+          <div>
+            <button
+              class="button button-primary"
+              onclick="openCreateModal()"
+              aria-haspopup="dialog"
+              aria-controls="open">
+              <span class="material-symbols-outlined" aria-hidden="true">
+                add
+              </span>
+              NY OPGAVE
+            </button>
+          </div>
         </div>
+      </section>
 
+      <!-- modal med opret ny opgave / rediger opgave -->
+      <div
         <div
-          role="group"
-          class="table-pagination"
-          aria-label="Skift side i tabellen">
-          <button class="button button-arrow" id="prev-page">Forrige</button>
-          <span class="pagination-mobile" id="current-page">Side 1</span>
-          <button class="button button-arrow" id="next-page">Næste</button>
+        class="fds-modal"
+        id="open"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="Modal titel"
+        aria-describedby="Modal Beskrivelse">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title" id="modal-example-heading">
+              Opret ny opgave
+            </h2>
+            <p id="modal-description" class="sr-only">
+              Formular til oprettelse og redigering af opgaver
+            </p>
+            <button
+              class="modal-close function-link"
+              data-modal-close
+              aria-label="Luk dialog">
+              <span class="material-symbols-outlined" aria-hidden="true"
+                >close</span
+              >
+              Luk
+            </button>
+          </div>
+
+          <div class="modal-body grid">
+            <div class="field full">
+              <label for="title">Titel</label>
+              <input
+                id="title"
+                required
+                aria-required="true"
+                type="text"
+                placeholder="Eksempel: Velkomst" />
+            </div>
+
+            <div class="field full">
+              <label for="description">Beskrivelse</label>
+              <textarea
+                id="description"
+                required
+                aria-required="true"
+                rows="4"
+                placeholder="Eksempel: Start ved hovedindgangen til Nymindegablejren."></textarea>
+            </div>
+
+            <div class="field">
+              <label for="type">Type</label>
+              <input
+                id="type"
+                type="text"
+                placeholder="Land / Sø"
+                required
+                aria-required="true" />
+            </div>
+
+            <div class="field">
+              <label for="location">Lokation</label>
+              <input
+                id="location"
+                type="text"
+                placeholder="Eksempel: Nymindegab, Hovedport"
+                required
+                aria-required="true" />
+            </div>
+
+            <div class="field">
+              <label for="radius">Radius (Meter)</label>
+              <input
+                id="radius"
+                type="number"
+                placeholder="Eksempel: 22"
+                required
+                aria-required="true" />
+            </div>
+
+            <div class="field">
+              <label for="difficulty">Sværhedsgrad</label>
+              <input
+                id="difficulty"
+                placeholder="Let / Mellem / Svær"
+                required
+                aria-required="true" />
+            </div>
+
+            <div class="field">
+              <label for="latitude">Breddegrad</label>
+              <input
+                id="latitude"
+                type="number"
+                step="any"
+                placeholder="Eksempel: 55,7398"
+                required
+                aria-required="true" />
+            </div>
+
+            <div class="field">
+              <label for="longitude">Længdegrad</label>
+              <input
+                id="longitude"
+                type="number"
+                step="any"
+                placeholder="Eksempel: 8,2501"
+                required
+                aria-required="true" />
+            </div>
+
+            <div class="field">
+              <label for="options">Handlinger (adskilt af ; semikolon)</label>
+              <input
+                id="options"
+                placeholder="Eksempel: Start;Læs historie først"
+                required
+                aria-required="true" />
+            </div>
+
+            <div class="field">
+              <label for="activationCondition">Aktiveringsbetingelse</label>
+              <input
+                id="activationCondition"
+                placeholder="Eksempel:Lokalitet "
+                required
+                aria-required="true" />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="button button-primary" onclick="clearForm()">
+              Ryd formular
+            </button>
+            <button class="button button-secondary" onclick="createTask()">
+              OPRET OPGAVE
+            </button>
+            <button
+              id="updateBtn"
+              class="button button-secondary"
+              onclick="updateTask()"
+              style="display: none">
+              Gem ændringer
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      <!-- tabel med nuværende opgaver -->
+      <div>
+        <p
+          aria-live="polite"
+          aria-atomic="true"
+          class="rows-message"
+          id="table-pagination-message">
+          Viser <strong class="displayed-rows">1-10</strong> af
+          <strong class="total-rows">0</strong> rækker
+        </p>
+
+        <div class="table--responsive-scroll" tabindex="0">
+          <table
+            class="table table--responsive-headers"
+            id="task-table"
+            aria-label="Liste over opgaver">
+            <thead>
+              <tr>
+                <th scope="col">
+                  <button
+                    type="button"
+                    data-sort="ID"
+                    aria-label="Sorter efter ID"
+                    aria-sort="none">
+                    ID
+                    <span class="material-symbols-outlined">unfold_more</span>
+                  </button>
+                </th>
+
+                <th scope="col">
+                  <button
+                    type="button"
+                    data-sort="Title"
+                    aria-label="Sorter efter Titel"
+                    aria-sort="none">
+                    Titel
+                    <span class="material-symbols-outlined">unfold_more</span>
+                  </button>
+                </th>
+
+                <th scope="col">
+                  <button
+                    type="button"
+                    data-sort="Type"
+                    aria-label="Sorter efter Type"
+                    aria-sort="none">
+                    Type
+                    <span class="material-symbols-outlined">unfold_more</span>
+                  </button>
+                </th>
+
+                <th scope="col">Lokation</th>
+                <th scope="col">Muligheder</th>
+                <th scope="col">Breddegrad</th>
+                <th scope="col">Længdegrad</th>
+                <th scope="col" id="edit">Handlinger</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="table-pagination-options">
+          <div class="form-group">
+            <label class="form-label" for="pagination-pages"
+              >Vis rækker per side:</label
+            >
+            <select class="form-select" id="pagination-pages">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="all">Alle</option>
+            </select>
+          </div>
+
+          <div
+            role="group"
+            class="table-pagination"
+            aria-label="Skift side i tabellen">
+            <button
+              class="button button-arrow"
+              id="prev-page"
+              aria-label="Gå til forrige side">
+              Forrige
+            </button>
+            <span
+              class="pagination-mobile"
+              id="current-page"
+              aria-live="polite">
+              Side 1
+            </span>
+            <button
+              class="button button-arrow"
+              id="next-page"
+              aria-label="Gå til næste side">
+              Næste
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
 
     <!-- footer -->
-    <footer class="global-footer mobile-only">
+    <footer
+      class="global-footer mobile-only"
+      aria-label="Handlinger nederst på siden">
       <div>
         <a
           class="button-primary button"
