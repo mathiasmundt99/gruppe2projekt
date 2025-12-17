@@ -29,7 +29,7 @@
     <main>
       <section class="action-bar">
         <div class="form-group search">
-          <label for="input-type-text" class="sr-only">Søg efter indhold</label>
+          <label for="search-input" class="sr-only">Søg efter indhold</label>
           <input
             class="form-input input-char-27"
             id="search-input"
@@ -76,7 +76,6 @@
 
       <!-- modal med opret ny opgave / rediger opgave -->
       <div
-        <div
         class="fds-modal"
         id="open"
         role="dialog"
@@ -156,6 +155,7 @@
             <div class="field">
               <label for="difficulty">Sværhedsgrad</label>
               <input
+              type="text"
                 id="difficulty"
                 placeholder="Let / Mellem / Svær"
                 required
@@ -218,6 +218,7 @@
               Gem ændringer
             </button>
           </div>
+        </div>
         </div>
       </div>
 
@@ -344,5 +345,42 @@
       </div>
     </footer>
     <div id="modal-overlay" class="modal-overlay"></div>
+    <div
+      class="fds-modal"
+      id="delete-confirm-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-modal-heading"
+      aria-hidden="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="delete-modal-heading">Slet opgave</h2>
+          <button
+            class="modal-close function-link"
+            data-modal-close
+            aria-label="Luk dialog">
+            <span class="material-symbols-outlined">close</span>
+            Luk
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <p>Er du sikker på, at du vil slette denne opgave?</p>
+          <p><strong>Denne handling kan ikke fortrydes.</strong></p>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            class="button button-secondary"
+            onclick="closeModal('delete-confirm-modal')">
+            Annuller
+          </button>
+
+          <button class="button button-primary" id="confirmDeleteBtn">
+            Ja, slet
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

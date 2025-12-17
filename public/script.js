@@ -9,6 +9,7 @@ let currentPage = 1;
 let rowsPerPage = 10;
 let sortColumn = null;
 let sortDirection = "asc";
+let deleteID = null;
 
 // initiering
 document.addEventListener("DOMContentLoaded", function () {
@@ -101,15 +102,22 @@ async function updateTask() {
     }
 }
 
-async function deleteTask(id) {
-    if (!confirm("Er du sikker på, at du vil slette denne opgave?")) return;
-    try {
-        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-        loadTasks();
+function deleteTask(id) {
+    deleteID = id;
+    openModal("delete-confirm-modal");
+}
 
+async function confirmDelete() {
+    if (!deleteID) return;
+
+    try {
+        await fetch(`${API_URL}/${deleteID}`, { method: "DELETE" });
+        loadTasks();
+        closeModal("delete-confirm-modal");
+        deleteID = null;
     } catch (error) {
         console.error(error);
-        alert("Kunne ikke slette opgaven, prøv igen senere")
+        alert("Kunne ikke slette opgaven, prøv igen senere");
     }
 }
 
@@ -452,3 +460,6 @@ document.getElementById("pagination-pages").addEventListener("change", (e) => {
 document.querySelectorAll("th button[data-sort]").forEach(btn => {
     btn.addEventListener("click", () => sortTasks(btn.dataset.sort));
 });
+
+document.getElementById("confirmDeleteBtn")
+    .addEventListener("click", confirmDelete);
