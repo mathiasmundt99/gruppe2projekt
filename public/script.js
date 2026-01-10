@@ -10,6 +10,7 @@ let rowsPerPage = 10;
 let sortColumn = null;
 let sortDirection = "asc";
 let deleteID = null;
+// jfjigjsi
 
 // initiering
 document.addEventListener("DOMContentLoaded", function () {
